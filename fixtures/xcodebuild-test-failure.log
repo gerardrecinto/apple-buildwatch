@@ -1,0 +1,5 @@
+Test Suite 'MediaPlaybackTests' started
+Test Case '-[MediaPlaybackTests testSegmentOrdering]' started.
+Sources/MediaPlaybackTests.swift:88: error: -[MediaPlaybackTests testSegmentOrdering] : XCTAssertEqual failed
+Test Case '-[MediaPlaybackTests testSegmentOrdering]' failed (2.3 seconds).
+** TEST FAILED **

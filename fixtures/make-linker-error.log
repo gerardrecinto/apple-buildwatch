@@ -1,0 +1,6 @@
+clang++ -o build/demo Sources/main.o Sources/cache.o
+Undefined symbols for architecture arm64:
+  "_BuildCacheOpen", referenced from:
+      _main in main.o
+ld: symbol(s) not found for architecture arm64
+clang: error: linker command failed with exit code 1

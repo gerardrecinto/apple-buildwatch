@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">buildwatch terminal demo</title>
+  <desc id="desc">Static terminal demo showing buildwatch output</desc>
+  <rect width="960" height="560" rx="20" fill="#020617"/>
+  <rect x="24" y="24" width="912" height="512" rx="14" fill="#0f172a" stroke="#334155"/>
+  <circle cx="54" cy="52" r="7" fill="#ef4444"/>
+  <circle cx="78" cy="52" r="7" fill="#f59e0b"/>
+  <circle cx="102" cy="52" r="7" fill="#22c55e"/>
+  <text x="44" y="96" font-family="Menlo, Consolas, monospace" font-size="20" fill="#e5e7eb">$ buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown</text>
+  <text x="44" y="142" font-family="Menlo, Consolas, monospace" font-size="22" fill="#93c5fd">BuildWatch Report</text>
+  <text x="44" y="184" font-family="Menlo, Consolas, monospace" font-size="18" fill="#e5e7eb">Status: failed</text>
+  <text x="44" y="218" font-family="Menlo, Consolas, monospace" font-size="18" fill="#e5e7eb">Failure: test_failure</text>
+  <text x="44" y="252" font-family="Menlo, Consolas, monospace" font-size="18" fill="#e5e7eb">Confidence: 91%</text>
+  <text x="44" y="286" font-family="Menlo, Consolas, monospace" font-size="18" fill="#e5e7eb">Likely owner: Media</text>
+  <text x="44" y="338" font-family="Menlo, Consolas, monospace" font-size="18" fill="#fca5a5">Evidence</text>
+  <text x="44" y="374" font-family="Menlo, Consolas, monospace" font-size="16" fill="#cbd5e1">line 3: Sources/MediaPlaybackTests.swift:88: XCTAssertEqual failed</text>
+  <text x="44" y="410" font-family="Menlo, Consolas, monospace" font-size="18" fill="#a7f3d0">Suggested action</text>
+  <text x="44" y="446" font-family="Menlo, Consolas, monospace" font-size="16" fill="#cbd5e1">Open the failing test, compare recent git changes, and verify local repro.</text>
+</svg>

@@ -1,0 +1,4 @@
+CompileSwift normal arm64 Sources/MediaDecoder.swift
+Sources/MediaDecoder.swift:142:17: error: use of unresolved identifier 'AVAssetTrackSegment'
+Sources/MediaDecoder.swift:156:9: error: cannot convert value of type 'CMTime' to specified type 'Double'
+** BUILD FAILED **

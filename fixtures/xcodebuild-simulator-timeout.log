@@ -1,0 +1,4 @@
+xcodebuild: error: Failed to build project DemoApp with scheme DemoApp.
+CoreSimulator failed to boot simulator iPhone 16.
+simctl boot failed: timeout waiting for device to become available.
+Command timed out after 600 seconds.

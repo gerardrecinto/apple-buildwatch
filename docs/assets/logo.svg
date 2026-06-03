@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
+  <title id="title">apple-buildwatch logo</title>
+  <desc id="desc">Terminal styled logo for a build observability CLI</desc>
+  <rect width="920" height="240" rx="28" fill="#0b1220"/>
+  <rect x="34" y="34" width="852" height="172" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
+  <circle cx="66" cy="62" r="8" fill="#ef4444"/>
+  <circle cx="92" cy="62" r="8" fill="#f59e0b"/>
+  <circle cx="118" cy="62" r="8" fill="#22c55e"/>
+  <text x="64" y="116" font-family="Menlo, Consolas, monospace" font-size="34" fill="#e5e7eb">buildwatch analyze xcodebuild.log</text>
+  <text x="64" y="158" font-family="Menlo, Consolas, monospace" font-size="26" fill="#93c5fd">failure: test_failure  confidence: 91%</text>
+  <text x="64" y="190" font-family="Menlo, Consolas, monospace" font-size="22" fill="#a7f3d0">next: route to Media with stack context</text>
+</svg>

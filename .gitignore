@@ -1,0 +1,8 @@
+.build/
+.swiftpm/
+DerivedData/
+*.xcresult
+*.log
+!.gitkeep
+!fixtures/*.log
+.DS_Store
