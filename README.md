@@ -1,15 +1,17 @@
 # apple-buildwatch
 
+![CI](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/ci.yml/badge.svg)
+![Release](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/release.yml/badge.svg)
+![Swift](https://img.shields.io/badge/Swift-6.0-orange?logo=swift&logoColor=white)
+![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey?logo=apple&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-7%20passed-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
 ![apple-buildwatch logo](docs/assets/logo.svg)
 
 > From raw build failure to owner, evidence, and next action.
 
 Swift 6 command-line tool for Apple-style build observability. It analyzes `xcodebuild`, XCTest, and Makefile logs, classifies the failure, extracts stack context, reads git metadata, and generates a status report that engineering, QA, and program-management partners can act on.
-
-![Swift](https://img.shields.io/badge/Swift-6.0-orange?logo=swift&logoColor=white)
-![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey?logo=apple&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-7%20passed-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ![demo](docs/assets/demo.gif)
 
@@ -84,6 +86,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 - distributed build scheduler simulation with critical path and retry accounting
 - fixtures for compiler, linker, simulator, and test failures
 - Swift XCTest coverage for the classifier, stack parser, and scheduler
+- `version` command — prints build version and platform info
 
 ---
 
@@ -136,22 +139,29 @@ The repo also includes `SchedulerSimulation`, a small local model of distributed
 
 ## Install
 
+### Download binary (macOS)
+
+Download the latest `buildwatch` binary from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
+
+```bash
+curl -L https://github.com/gerardrecinto/apple-buildwatch/releases/latest/download/buildwatch -o buildwatch
+chmod +x buildwatch
+mv buildwatch /usr/local/bin/buildwatch
+```
+
+### Build from source
+
 ```bash
 git clone https://github.com/gerardrecinto/apple-buildwatch.git
 cd apple-buildwatch
 swift build -c release
+cp .build/release/buildwatch /usr/local/bin/buildwatch
 ```
 
 Run from source:
 
 ```bash
 swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
-```
-
-Install locally:
-
-```bash
-cp .build/release/buildwatch /usr/local/bin/buildwatch
 ```
 
 ---
@@ -162,6 +172,7 @@ cp .build/release/buildwatch /usr/local/bin/buildwatch
 buildwatch analyze <log-path> [--format terminal|json|markdown]
 buildwatch run -- <command> [args...]
 buildwatch simulate
+buildwatch version
 ```
 
 Examples:
@@ -171,6 +182,7 @@ buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
 buildwatch analyze fixtures/make-linker-error.log
 buildwatch run -- make test
 buildwatch simulate
+buildwatch version
 ```
 
 ---
