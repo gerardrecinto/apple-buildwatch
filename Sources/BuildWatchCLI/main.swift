@@ -15,6 +15,8 @@ struct BuildWatchCLI {
             try run(args)
         case "simulate":
             simulate()
+        case "version":
+            print("buildwatch 1.0.0")
         default:
             print(help)
         }
@@ -87,6 +89,7 @@ struct BuildWatchCLI {
       buildwatch analyze <log-path> [--format terminal|json|markdown]
       buildwatch run -- <command> [args...]
       buildwatch simulate
+      buildwatch version
 
     Examples:
       buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
