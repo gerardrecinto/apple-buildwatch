@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without the leading v (e.g. 1.0.1)'
+        required: true
 
 permissions:
   contents: write
@@ -15,8 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve version
+        id: ver
+        run: |
+          raw="${{ github.event.inputs.version || github.ref_name }}"
+          echo "version=${raw#v}" >> "$GITHUB_OUTPUT"
+
       - name: Build release binary
         run: swift build -c release
+
+      - name: Run tests
+        run: swift test
 
       - name: Package binary
         run: |
@@ -26,5 +40,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.version }}
           generate_release_notes: true
           files: buildwatch-macos.zip

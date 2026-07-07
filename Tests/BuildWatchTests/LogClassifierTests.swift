@@ -42,6 +42,18 @@ final class LogClassifierTests: XCTestCase {
         XCTAssertTrue(markdown.contains("MediaDecoder.swift"))
     }
 
+    func testClassifiesBareTestFailedBanner() {
+        let result = LogClassifier().analyze(log: "** TEST FAILED **\n")
+
+        XCTAssertEqual(result.failureKind, .testFailure)
+    }
+
+    func testDurationsDoNotLookLikeHttpErrors() {
+        let result = LogClassifier().analyze(log: "Executed 12 tests in 0.403 seconds\n")
+
+        XCTAssertNotEqual(result.failureKind, .networkFailure)
+    }
+
     private func fixture(_ name: String) throws -> String {
         let url = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent("fixtures")

@@ -16,7 +16,7 @@ struct BuildWatchCLI {
         case "simulate":
             simulate()
         case "version":
-            print("buildwatch 1.0.0")
+            print("buildwatch 1.0.1")
         default:
             print(help)
         }

@@ -26,7 +26,7 @@ public struct LogClassifier: Sendable {
         ),
         Rule(
             kind: .testFailure,
-            pattern: #"(?i)(Test Case .+ failed|XCTAssert|\\*\\* TEST FAILED \\*\\*)"#,
+            pattern: #"(?i)(Test Case .+ failed|XCTAssert|\*\* TEST FAILED \*\*)"#,
             summary: "XCTest reported a product or test assertion failure.",
             action: "Open the failing test, compare recent git changes, and confirm whether the failure reproduces locally.",
             confidence: 0.91
@@ -61,7 +61,7 @@ public struct LogClassifier: Sendable {
         ),
         Rule(
             kind: .networkFailure,
-            pattern: #"(?i)(TLS handshake|connection reset|network is unreachable|timed out while downloading|403|404)"#,
+            pattern: #"(?i)(TLS handshake|connection reset|network is unreachable|timed out while downloading|HTTP 40[34]|status code 40[34])"#,
             summary: "The build failed while fetching a remote dependency or artifact.",
             action: "Verify artifact host health, credentials, retry policy, and local cache state.",
             confidence: 0.82
