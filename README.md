@@ -86,7 +86,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 - distributed build scheduler simulation with critical path and retry accounting
 - fixtures for compiler, linker, simulator, and test failures
 - Swift XCTest coverage for the classifier, stack parser, and scheduler
-- `version` command — prints build version and platform info
+- `version` command: prints build version and platform info
 
 ---
 
