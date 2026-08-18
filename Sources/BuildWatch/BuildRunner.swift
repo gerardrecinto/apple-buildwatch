@@ -25,9 +25,12 @@ public struct BuildRunner: Sendable {
 
         let start = Date()
         try process.run()
+        // Drain the pipe before waiting: a child that fills the ~64KB pipe
+        // buffer blocks on write while we block in waitUntilExit, deadlocking
+        // on any real build log.
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
         let log = String(data: data, encoding: .utf8) ?? ""
         return Result(log: log, exitCode: process.terminationStatus, duration: Date().timeIntervalSince(start))
     }

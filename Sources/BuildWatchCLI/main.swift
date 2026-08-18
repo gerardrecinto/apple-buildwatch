@@ -15,6 +15,8 @@ struct BuildWatchCLI {
             try run(args)
         case "simulate":
             simulate()
+        case "version":
+            print("buildwatch 1.0.1")
         default:
             print(help)
         }
@@ -93,6 +95,7 @@ struct BuildWatchCLI {
       buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
       buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
       buildwatch simulate
+      buildwatch version
 
     --owners auto (default) resolves the likely owner from an explicit
     .buildwatch-owners.json override, then CODEOWNERS, then a git-history
