@@ -13,6 +13,16 @@ public struct GitContextProvider: Sendable {
         return GitContext(branch: branch, sha: sha, changedFiles: changed)
     }
 
+    /// The top-level directory of the git repository containing
+    /// `workingDirectory`, or nil if it isn't inside a git repo (or `git`
+    /// isn't available). Used to locate CODEOWNERS and owner-override
+    /// config files relative to the repo root rather than the current
+    /// working directory.
+    public func repositoryRoot(workingDirectory: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)) -> URL? {
+        guard let path = runGit(["rev-parse", "--show-toplevel"], workingDirectory: workingDirectory) else { return nil }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
     private func runGit(_ args: [String], workingDirectory: URL) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")

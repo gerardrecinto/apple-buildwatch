@@ -38,6 +38,62 @@ public struct StackFrame: Codable, Equatable, Sendable {
     }
 }
 
+/// How much to trust a resolved `OwnershipResult`.
+///
+/// This is a deterministic, rule-based tier, not a learned or fabricated
+/// probability. Each case is earned by a specific kind of evidence:
+public enum OwnershipConfidence: String, Codable, Equatable, Sendable, CaseIterable {
+    /// A file path directly matched an explicit config override or a
+    /// CODEOWNERS glob pattern. This is a direct, path-based match.
+    case high
+    /// No path-based mapping matched. A keyword/substring heuristic found a
+    /// signal (e.g. "media", "network", "test") in failure evidence, stack
+    /// frames, or changed files.
+    case medium
+    /// No path-based or keyword match. Fell back to the directory of the
+    /// first git-changed file, which is a weak signal at best.
+    case low
+    /// No evidence at all. The owner is reported as "unknown" rather than
+    /// guessed.
+    case none
+}
+
+/// Where a resolved `OwnershipResult` came from.
+public enum OwnershipSource: String, Codable, Equatable, Sendable, CaseIterable {
+    /// Matched a pattern in the optional `.buildwatch-owners.json` override file.
+    case explicitConfig = "explicit_config"
+    /// Matched a pattern in a CODEOWNERS file.
+    case codeowners = "CODEOWNERS"
+    /// Matched via the legacy keyword/directory heuristic.
+    case gitHistoryHeuristic = "git_history_heuristic"
+    /// Nothing matched.
+    case none
+}
+
+/// The result of resolving a likely owner for a build failure. Always
+/// present (never nil) so a caller always has a confidence and an
+/// evidence trail to inspect, even when the owner is "unknown".
+public struct OwnershipResult: Codable, Equatable, Sendable {
+    public let owner: String
+    public let confidence: OwnershipConfidence
+    public let evidence: String
+    public let source: OwnershipSource
+
+    public init(owner: String, confidence: OwnershipConfidence, evidence: String, source: OwnershipSource) {
+        self.owner = owner
+        self.confidence = confidence
+        self.evidence = evidence
+        self.source = source
+    }
+
+    public static let unknown = OwnershipResult(
+        owner: "unknown",
+        confidence: .none,
+        evidence: "No CODEOWNERS file, explicit override, or heuristic signal matched this failure.",
+        source: .none
+    )
+}
+
 public struct GitContext: Codable, Equatable, Sendable {
     public let branch: String
     public let sha: String
@@ -60,7 +116,7 @@ public struct BuildAnalysis: Codable, Equatable, Sendable {
     public let suggestedAction: String
     public let evidence: [EvidenceLine]
     public let stackFrames: [StackFrame]
-    public let likelyOwner: String?
+    public let likelyOwner: OwnershipResult
     public let git: GitContext
 
     public init(
@@ -71,7 +127,7 @@ public struct BuildAnalysis: Codable, Equatable, Sendable {
         suggestedAction: String,
         evidence: [EvidenceLine],
         stackFrames: [StackFrame],
-        likelyOwner: String?,
+        likelyOwner: OwnershipResult,
         git: GitContext
     ) {
         self.status = status

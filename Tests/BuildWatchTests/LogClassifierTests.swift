@@ -11,7 +11,9 @@ final class LogClassifierTests: XCTestCase {
 
         XCTAssertEqual(result.failureKind, .testFailure)
         XCTAssertGreaterThan(result.confidence, 0.80)
-        XCTAssertEqual(result.likelyOwner, "Media")
+        XCTAssertEqual(result.likelyOwner.owner, "Media")
+        XCTAssertEqual(result.likelyOwner.confidence, .medium)
+        XCTAssertEqual(result.likelyOwner.source, .gitHistoryHeuristic)
         XCTAssertFalse(result.evidence.isEmpty)
         XCTAssertFalse(result.stackFrames.isEmpty)
     }
