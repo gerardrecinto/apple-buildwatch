@@ -25,12 +25,15 @@ struct BuildWatchCLI {
     private static func analyze(_ args: [String]) throws {
         guard let path = args.first else { throw BuildWatchError.missingArgument("log path") }
         let format = value(after: "--format", in: args) ?? "terminal"
+        let ownersMode = value(after: "--owners", in: args) ?? "auto"
         let url = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: url.path) else { throw BuildWatchError.fileNotFound(path) }
 
         let log = try String(contentsOf: url, encoding: .utf8)
-        let git = GitContextProvider().readGitContext()
-        let analysis = LogClassifier().analyze(log: log, git: git)
+        let gitProvider = GitContextProvider()
+        let git = gitProvider.readGitContext()
+        let repoRoot = ownersMode == "off" ? nil : gitProvider.repositoryRoot()
+        let analysis = LogClassifier().analyze(log: log, git: git, repoRoot: repoRoot)
         let writer = ReportWriter()
 
         switch format {
@@ -46,10 +49,13 @@ struct BuildWatchCLI {
     private static func run(_ args: [String]) throws {
         guard !args.isEmpty else { throw BuildWatchError.missingArgument("command") }
         let format = value(after: "--format", in: args) ?? "terminal"
-        let command = args.split(separator: "--").last.map(Array.init) ?? args.filter { $0 != "--format" && $0 != format }
+        let ownersMode = value(after: "--owners", in: args) ?? "auto"
+        let command = args.split(separator: "--").last.map(Array.init) ?? args.filter { $0 != "--format" && $0 != format && $0 != "--owners" && $0 != ownersMode }
         let result = try BuildRunner().run(command: command)
-        let git = GitContextProvider().readGitContext()
-        let analysis = LogClassifier().analyze(log: result.log, git: git)
+        let gitProvider = GitContextProvider()
+        let git = gitProvider.readGitContext()
+        let repoRoot = ownersMode == "off" ? nil : gitProvider.repositoryRoot()
+        let analysis = LogClassifier().analyze(log: result.log, git: git, repoRoot: repoRoot)
         let writer = ReportWriter()
 
         switch format {
@@ -86,14 +92,20 @@ struct BuildWatchCLI {
     buildwatch
 
     Commands:
-      buildwatch analyze <log-path> [--format terminal|json|markdown]
-      buildwatch run -- <command> [args...]
+      buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
+      buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
       buildwatch simulate
       buildwatch version
+
+    --owners auto (default) resolves the likely owner from an explicit
+    .buildwatch-owners.json override, then CODEOWNERS, then a git-history
+    heuristic. --owners off skips the config/CODEOWNERS lookup and only
+    uses the heuristic fallback.
 
     Examples:
       buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
       buildwatch analyze fixtures/make-linker-error.log
+      buildwatch analyze fixtures/xcodebuild-test-failure.log --owners auto
       buildwatch simulate
     """
 }

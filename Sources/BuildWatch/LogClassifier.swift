@@ -84,7 +84,7 @@ public struct LogClassifier: Sendable {
 
     public init() {}
 
-    public func analyze(log: String, git: GitContext = .unavailable) -> BuildAnalysis {
+    public func analyze(log: String, git: GitContext = .unavailable, repoRoot: URL? = nil) -> BuildAnalysis {
         let lines = log.components(separatedBy: .newlines)
         let stackFrames = StackTraceExtractor().extract(from: log)
 
@@ -100,7 +100,7 @@ public struct LogClassifier: Sendable {
                     suggestedAction: rule.action,
                     evidence: Array(evidence.prefix(5)),
                     stackFrames: Array(stackFrames.prefix(5)),
-                    likelyOwner: OwnerResolver().resolve(from: evidence, stackFrames: stackFrames, git: git),
+                    likelyOwner: OwnerResolver().resolve(evidence: evidence, stackFrames: stackFrames, git: git, repoRoot: repoRoot),
                     git: git
                 )
             }
@@ -116,7 +116,7 @@ public struct LogClassifier: Sendable {
                 EvidenceLine(lineNumber: $0.offset + 1, text: $0.element)
             }),
             stackFrames: Array(stackFrames.prefix(5)),
-            likelyOwner: OwnerResolver().resolve(from: [], stackFrames: stackFrames, git: git),
+            likelyOwner: OwnerResolver().resolve(evidence: [], stackFrames: stackFrames, git: git, repoRoot: repoRoot),
             git: git
         )
     }
@@ -128,29 +128,5 @@ public struct LogClassifier: Sendable {
             guard regex.firstMatch(in: line, range: range) != nil else { return nil }
             return EvidenceLine(lineNumber: index + 1, text: line)
         }
-    }
-}
-
-private struct OwnerResolver: Sendable {
-    func resolve(from evidence: [EvidenceLine], stackFrames: [StackFrame], git: GitContext) -> String? {
-        let candidates = stackFrames.compactMap(\.file) + evidence.map(\.text) + git.changedFiles
-        if let match = candidates.first(where: { $0.localizedCaseInsensitiveContains("network") }) {
-            return ownerName(from: match, fallback: "Networking")
-        }
-        if let match = candidates.first(where: { $0.localizedCaseInsensitiveContains("media") || $0.localizedCaseInsensitiveContains("audio") }) {
-            return ownerName(from: match, fallback: "Media")
-        }
-        if let match = candidates.first(where: { $0.localizedCaseInsensitiveContains("test") }) {
-            return ownerName(from: match, fallback: "Test Infrastructure")
-        }
-        return git.changedFiles.first.map { ownerName(from: $0, fallback: "Recent Change Owner") }
-    }
-
-    private func ownerName(from value: String, fallback: String) -> String {
-        let lowered = value.lowercased()
-        if lowered.contains("network") { return "Networking" }
-        if lowered.contains("media") || lowered.contains("audio") { return "Media" }
-        if lowered.contains("test") { return "Test Infrastructure" }
-        return fallback
     }
 }

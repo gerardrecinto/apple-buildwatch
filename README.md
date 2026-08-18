@@ -4,7 +4,7 @@
 ![Release](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/release.yml/badge.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange?logo=swift&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey?logo=apple&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-7%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ![apple-buildwatch logo](docs/assets/logo.svg)
@@ -46,6 +46,9 @@ confidence: 91%
 branch: main
 sha: abc1234
 likely_owner: Media
+owner_confidence: medium
+ownership_source: git-history heuristic
+ownership_evidence: keyword "media" matched in: Sources/MediaPlaybackTests.swift
 
 summary:
   XCTest reported a product or test assertion failure.
@@ -81,6 +84,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 - Makefile and linker error support
 - stack trace and file-line extraction
 - git branch, SHA, and changed-file context
+- CODEOWNERS-aware ownership resolution with confidence and evidence
 - Markdown, JSON, and terminal output
 - build command wrapper for `make`, `xcodebuild`, or generic shell commands
 - distributed build scheduler simulation with critical path and retry accounting
@@ -108,6 +112,43 @@ See [docs/failure-taxonomy.md](docs/failure-taxonomy.md).
 
 ---
 
+## Ownership resolution
+
+`buildwatch` tries to answer "who likely owns this failure," not just "what failed." It resolves an owner in this order, stopping at the first match:
+
+1. **Explicit override** -- an optional `.buildwatch-owners.json` file at the repo root, for teams that want to hardcode a friendly owner name for a path.
+2. **CODEOWNERS** -- `.github/CODEOWNERS`, `CODEOWNERS`, or `docs/CODEOWNERS` (checked in that order; the first one found is used). Patterns are matched against the failure's file path using real CODEOWNERS/gitignore glob semantics -- `*`, `**`, anchored vs. unanchored patterns, and **last match wins** when multiple patterns match the same path.
+3. **Git-history heuristic** -- a lower-confidence fallback: a keyword match (e.g. "media", "network", "test") in the failure evidence or changed files, or, failing that, the directory of the first git-changed file.
+4. **Unknown** -- when nothing above matches. `buildwatch` reports `unknown` with `none` confidence rather than guessing.
+
+Every resolution reports a `confidence` and an `evidence` trail explaining why:
+
+| Confidence | Meaning |
+|---|---|
+| `high` | A file path directly matched an explicit override or a CODEOWNERS pattern. |
+| `medium` | A keyword heuristic matched failure evidence, stack frames, or changed files. |
+| `low` | No path or keyword match; fell back to the directory of the first git-changed file. |
+| `none` | No evidence at all; owner is `unknown`. |
+
+Use `--owners auto` (the default) for full resolution, or `--owners off` to skip the config/CODEOWNERS lookup and use only the heuristic fallback:
+
+```bash
+buildwatch analyze fixtures/xcodebuild-test-failure.log --owners auto
+buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
+```
+
+`.buildwatch-owners.json` format:
+
+```json
+{
+  "overrides": [
+    { "pattern": "Sources/Media/**", "owner": "Media Platform Team" }
+  ]
+}
+```
+
+---
+
 ## Architecture
 
 ```text
@@ -125,6 +166,9 @@ LogClassifier
           +--> StackTraceExtractor
           +--> GitContextProvider
           +--> OwnerResolver
+                 - .buildwatch-owners.json (explicit override)
+                 - CODEOWNERS (glob match, last match wins)
+                 - git-history heuristic (fallback)
           |
           v
 ReportWriter
@@ -169,8 +213,8 @@ swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 ## Commands
 
 ```bash
-buildwatch analyze <log-path> [--format terminal|json|markdown]
-buildwatch run -- <command> [args...]
+buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
+buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
 buildwatch simulate
 buildwatch version
 ```
@@ -180,6 +224,7 @@ Examples:
 ```bash
 buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
 buildwatch analyze fixtures/make-linker-error.log
+buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
 buildwatch run -- make test
 buildwatch simulate
 buildwatch version
