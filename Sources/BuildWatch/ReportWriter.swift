@@ -19,7 +19,10 @@ public struct ReportWriter: Sendable {
         confidence: \(Int(analysis.confidence * 100))%
         branch: \(analysis.git.branch)
         sha: \(analysis.git.sha)
-        likely_owner: \(analysis.likelyOwner ?? "unknown")
+        likely_owner: \(analysis.likelyOwner.owner)
+        owner_confidence: \(analysis.likelyOwner.confidence.rawValue)
+        ownership_source: \(ownershipSourceLabel(analysis.likelyOwner.source))
+        ownership_evidence: \(analysis.likelyOwner.evidence)
 
         summary:
           \(analysis.summary)
@@ -54,7 +57,13 @@ public struct ReportWriter: Sendable {
         | Confidence | \(Int(analysis.confidence * 100))% |
         | Branch | \(analysis.git.branch) |
         | SHA | \(analysis.git.sha) |
-        | Likely owner | \(analysis.likelyOwner ?? "unknown") |
+        | Likely owner | \(analysis.likelyOwner.owner) |
+        | Owner confidence | \(analysis.likelyOwner.confidence.rawValue) |
+        | Ownership source | \(ownershipSourceLabel(analysis.likelyOwner.source)) |
+
+        ## Ownership Evidence
+
+        \(analysis.likelyOwner.evidence)
 
         ## Summary
 
@@ -72,6 +81,19 @@ public struct ReportWriter: Sendable {
 
         \(frames.isEmpty ? "- none" : frames)
         """
+    }
+
+    private func ownershipSourceLabel(_ source: OwnershipSource) -> String {
+        switch source {
+        case .explicitConfig:
+            return "\(OwnerConfigFile.fileName) (explicit override)"
+        case .codeowners:
+            return "CODEOWNERS"
+        case .gitHistoryHeuristic:
+            return "git-history heuristic"
+        case .none:
+            return "none (no signal found)"
+        }
     }
 
     public func json(_ analysis: BuildAnalysis) throws -> String {
