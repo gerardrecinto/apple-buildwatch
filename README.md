@@ -4,7 +4,7 @@
 ![Release](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/release.yml/badge.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange?logo=swift&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey?logo=apple&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-39%20passed-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ![apple-buildwatch logo](docs/assets/logo.svg)
@@ -85,6 +85,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 - stack trace and file-line extraction
 - git branch, SHA, and changed-file context
 - CODEOWNERS-aware ownership resolution with confidence and evidence
+- `compare`: build-over-build diff between two JSON reports (regressed/resolved/persisting/changed), exits 1 on regression for CI gating
 - Markdown, JSON, and terminal output
 - build command wrapper for `make`, `xcodebuild`, or generic shell commands
 - distributed build scheduler simulation with critical path and retry accounting
@@ -215,6 +216,7 @@ swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 ```bash
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
 buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
+buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
 buildwatch simulate
 buildwatch version
 ```
@@ -228,7 +230,13 @@ buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
 buildwatch run -- make test
 buildwatch simulate
 buildwatch version
+
+# Build-over-build diff: is last night's failure still the same one?
+buildwatch analyze build.log --format json > today.json
+buildwatch compare yesterday.json today.json
 ```
+
+`compare` diffs two `analyze --format json` snapshots into one transition — `regressed` (newly failing), `resolved` (newly passing), `persisting` (same failure kind both times), `changed` (still red, different failure kind than last time), or `stable`. It also flags an owner change between the two runs. Exits 1 on `regressed`, so it drops into a CI gate the same way `run`'s exit-code passthrough does.
 
 ---
 
