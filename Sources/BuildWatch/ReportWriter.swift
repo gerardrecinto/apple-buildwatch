@@ -102,4 +102,58 @@ public struct ReportWriter: Sendable {
         let data = try encoder.encode(analysis)
         return String(decoding: data, as: UTF8.self)
     }
+
+    public func terminal(_ comparison: BuildComparison) -> String {
+        """
+        buildwatch compare
+        transition: \(comparison.transition.rawValue)
+        previous: \(comparison.previousStatus)\(comparison.previousFailureKind.map { " (\($0.rawValue))" } ?? "")
+        current:  \(comparison.currentStatus)\(comparison.currentFailureKind.map { " (\($0.rawValue))" } ?? "")
+        owner_changed: \(comparison.ownerChanged)\(ownerChangeLine(comparison))
+        confidence_delta: \(signedPercent(comparison.confidenceDelta))
+        branch_changed: \(comparison.branchChanged)
+        sha_changed: \(comparison.shaChanged)
+
+        summary:
+          \(comparison.summary)
+        """
+    }
+
+    public func markdown(_ comparison: BuildComparison) -> String {
+        """
+        # BuildWatch Compare
+
+        | Field | Previous | Current |
+        |---|---|---|
+        | Status | \(comparison.previousStatus) | \(comparison.currentStatus) |
+        | Failure | \(comparison.previousFailureKind?.rawValue ?? "-") | \(comparison.currentFailureKind?.rawValue ?? "-") |
+        | Owner | \(comparison.previousOwner ?? "-") | \(comparison.currentOwner ?? "-") |
+
+        **Transition:** \(comparison.transition.rawValue)
+        **Confidence delta:** \(signedPercent(comparison.confidenceDelta))
+        **Branch changed:** \(comparison.branchChanged) · **SHA changed:** \(comparison.shaChanged)
+
+        ## Summary
+
+        \(comparison.summary)
+        """
+    }
+
+    public func json(_ comparison: BuildComparison) throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(comparison)
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    private func ownerChangeLine(_ comparison: BuildComparison) -> String {
+        guard comparison.ownerChanged, let previous = comparison.previousOwner, let current = comparison.currentOwner else {
+            return ""
+        }
+        return " (\(previous) -> \(current))"
+    }
+
+    private func signedPercent(_ delta: Double) -> String {
+        String(format: "%+.0f%%", delta * 100)
+    }
 }
