@@ -44,6 +44,14 @@ final class LogClassifierTests: XCTestCase {
         XCTAssertTrue(markdown.contains("MediaDecoder.swift"))
     }
 
+    func testClassifiesBuildTimeout() throws {
+        let log = try fixture("xcodebuild-build-timeout.log")
+        let result = LogClassifier().analyze(log: log)
+
+        XCTAssertEqual(result.failureKind, .timeout)
+        XCTAssertTrue(result.suggestedAction.localizedCaseInsensitiveContains("worker"))
+    }
+
     func testClassifiesBareTestFailedBanner() {
         let result = LogClassifier().analyze(log: "** TEST FAILED **\n")
 

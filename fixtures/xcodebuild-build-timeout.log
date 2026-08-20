@@ -1,0 +1,4 @@
+Executing build phase Compile Sources
+Build step 'Execute shell' marked build as failure
+Command timed out after 5400 seconds
+Build timed out and was terminated by the CI worker.
