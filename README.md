@@ -4,7 +4,7 @@
 ![Release](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/release.yml/badge.svg)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange?logo=swift&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey?logo=apple&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-39%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-41%20passed-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ![apple-buildwatch logo](docs/assets/logo.svg)
@@ -88,7 +88,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 - `compare`: build-over-build diff between two JSON reports (regressed/resolved/persisting/changed), exits 1 on regression for CI gating
 - Markdown, JSON, and terminal output
 - build command wrapper for `make`, `xcodebuild`, or generic shell commands
-- distributed build scheduler simulation with critical path and retry accounting
+- distributed build scheduler simulation with a fixed worker pool, critical path, and retry accounting -- a constrained worker pool can queue jobs and push the total past the dependency-only critical path
 - fixtures for compiler, linker, simulator, and test failures
 - Swift XCTest coverage for the classifier, stack parser, and scheduler
 - `version` command: prints build version and platform info
@@ -106,6 +106,7 @@ swift run buildwatch analyze fixtures/make-linker-error.log --format json
 | `simulator_failure` | CoreSimulator or simctl boot timeout |
 | `code_signing_failure` | provisioning profile or signing certificate |
 | `missing_dependency` | no such module, package resolution failed |
+| `timeout` | build or command timed out, SIGKILL |
 | `network_failure` | artifact download or remote fetch failure |
 | `infrastructure_failure` | disk full, xcode-select, DerivedData, worker pressure |
 
@@ -217,7 +218,7 @@ swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
 buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
 buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
-buildwatch simulate
+buildwatch simulate [--workers N]
 buildwatch version
 ```
 
@@ -229,6 +230,7 @@ buildwatch analyze fixtures/make-linker-error.log
 buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
 buildwatch run -- make test
 buildwatch simulate
+buildwatch simulate --workers 1
 buildwatch version
 
 # Build-over-build diff: is last night's failure still the same one?

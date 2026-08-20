@@ -16,9 +16,9 @@ struct BuildWatchCLI {
         case "compare":
             try compare(args)
         case "simulate":
-            simulate()
+            simulate(args)
         case "version":
-            print("buildwatch 1.1.0")
+            print("buildwatch \(Self.version) (\(Self.architecture); \(ProcessInfo.processInfo.operatingSystemVersionString))")
         default:
             print(help)
         }
@@ -129,8 +129,9 @@ struct BuildWatchCLI {
         return result
     }
 
-    private static func simulate() {
-        let result = SchedulerSimulation().run(jobs: SchedulerSimulation.sampleJobs, workerCount: 3)
+    private static func simulate(_ args: [String]) {
+        let workerCount = value(after: "--workers", in: args).flatMap(Int.init) ?? 3
+        let result = SchedulerSimulation().run(jobs: SchedulerSimulation.sampleJobs, workerCount: workerCount)
         print("""
         buildwatch scheduler simulation
         workers: \(result.workerCount)
@@ -145,6 +146,18 @@ struct BuildWatchCLI {
         return args[index + 1]
     }
 
+    static let version = "1.2.0"
+
+    private static var architecture: String {
+        #if arch(arm64)
+        return "arm64"
+        #elseif arch(x86_64)
+        return "x86_64"
+        #else
+        return "unknown"
+        #endif
+    }
+
     private static let help = """
     buildwatch
 
@@ -152,7 +165,7 @@ struct BuildWatchCLI {
       buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
       buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
       buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
-      buildwatch simulate
+      buildwatch simulate [--workers N]
       buildwatch version
 
     compare diffs two `analyze --format json` snapshots into one
@@ -165,6 +178,11 @@ struct BuildWatchCLI {
     heuristic. --owners off skips the config/CODEOWNERS lookup and only
     uses the heuristic fallback.
 
+    simulate models the sample job graph across a fixed worker pool
+    (--workers, default 3). Fewer workers than concurrently-ready jobs
+    forces some jobs to queue, which can push total_seconds past what the
+    dependency graph alone would require.
+
     Examples:
       buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
       buildwatch analyze fixtures/make-linker-error.log
@@ -172,5 +190,6 @@ struct BuildWatchCLI {
       buildwatch analyze build.log --format json > today.json
       buildwatch compare yesterday.json today.json
       buildwatch simulate
+      buildwatch simulate --workers 1
     """
 }
