@@ -35,9 +35,13 @@ public struct GitContextProvider: Sendable {
 
         do {
             try process.run()
+            // Drain the pipe before waiting, same fix as BuildRunner: `git
+            // diff --name-only` on a large changeset can exceed the pipe's
+            // ~64KB buffer, and waiting first would deadlock the child on
+            // its blocked write.
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
             guard process.terminationStatus == 0 else { return nil }
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
             return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
             return nil
