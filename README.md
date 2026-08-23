@@ -187,10 +187,11 @@ The repo also includes `SchedulerSimulation`, a small local model of distributed
 
 ### Download binary (macOS)
 
-Download the latest `buildwatch` binary from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
+Download the latest release zip from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
 
 ```bash
-curl -L https://github.com/gerardrecinto/apple-buildwatch/releases/latest/download/buildwatch -o buildwatch
+curl -L https://github.com/gerardrecinto/apple-buildwatch/releases/latest/download/buildwatch-macos.zip -o buildwatch-macos.zip
+unzip buildwatch-macos.zip
 chmod +x buildwatch
 mv buildwatch /usr/local/bin/buildwatch
 ```
