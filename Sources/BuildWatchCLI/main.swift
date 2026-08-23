@@ -146,7 +146,7 @@ struct BuildWatchCLI {
         return args[index + 1]
     }
 
-    static let version = "1.2.0"
+    static let version = "1.2.1"
 
     private static var architecture: String {
         #if arch(arm64)
