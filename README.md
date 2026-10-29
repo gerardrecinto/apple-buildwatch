@@ -121,14 +121,18 @@ buildwatch compare yesterday.json today.json
 
 #### Download binary (macOS)
 
-Download the latest release zip from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
+Releases through **v1.2.1** do not include checksums. Build from source below
+until a newer release lists both `buildwatch-macos.zip` and `SHA256SUMS`.
+Future releases made by this repository's release workflow publish both files.
+For such a release, run this from a checkout of the repository:
 
 ```bash
-curl -L https://github.com/gerardrecinto/apple-buildwatch/releases/latest/download/buildwatch-macos.zip -o buildwatch-macos.zip
-unzip buildwatch-macos.zip
-chmod +x buildwatch
-mv buildwatch /usr/local/bin/buildwatch
+read -r -p "Release tag with SHA256SUMS: " buildwatch_tag
+scripts/install-release.sh "$buildwatch_tag"
 ```
+
+The [binary installation guide](docs/BINARY_INSTALL.md) explains the checks and
+what the checksum does and does not prove.
 
 #### Build from source
 
@@ -136,7 +140,9 @@ mv buildwatch /usr/local/bin/buildwatch
 git clone https://github.com/gerardrecinto/apple-buildwatch.git
 cd apple-buildwatch
 swift build -c release
-cp .build/release/buildwatch /usr/local/bin/buildwatch
+mkdir -p "$HOME/.local/bin"
+install -m 755 .build/release/buildwatch "$HOME/.local/bin/buildwatch"
+"$HOME/.local/bin/buildwatch" version
 ```
 
 Run from source:
