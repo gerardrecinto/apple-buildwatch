@@ -3,17 +3,17 @@
 ![CI](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-*New here? When a software build breaks, this tool reads the error log and tells you what went wrong and who to ask.*
+*New here? When a software build breaks, this tool reads the error log and guesses what kind of failure it was and who might own it.*
 
-A Swift command-line tool that reads a failed `xcodebuild`, XCTest or `make` log and tells you what kind of failure it was, the lines that show it, who likely owns it, and what to try next. It is for people who triage broken CI builds.
+A Swift log classifier and triage CLI. It reads a failed `xcodebuild`, XCTest or `make` log, labels the failure with one of ten rule-based categories, shows the lines that matched, suggests a next step, and gives a rough guess at an owner. It is for people who triage broken CI builds.
 
 Live demo of the rules in your browser: https://gerardrecinto.github.io/apple-buildwatch/
 
 ![demo](docs/assets/demo.gif)
 
-## Try it in 60 seconds
+## Try it
 
-You need macOS 14 or later and a Swift 6 toolchain (Xcode 16 or later). The first run compiles the project, which takes a little while.
+You need macOS 14 or later and a Swift 6 toolchain (Xcode 16 or later). The first build takes a few minutes. After that, each command runs in a second or two.
 
 ```bash
 git clone https://github.com/gerardrecinto/apple-buildwatch.git
@@ -66,7 +66,7 @@ It does:
 
 - Match the log against ten ordered rules. The first rule with a matching line wins, and those lines are the evidence.
 - Pull out stack frames, file and line, and git branch, SHA and changed files.
-- Guess an owner from an override file, CODEOWNERS, or git history, and say `unknown` when nothing matches.
+- Guess an owner from an override file, CODEOWNERS, or a filename keyword heuristic over the git history, and say `unknown` when nothing matches. Only the override file and CODEOWNERS are real ownership data. The keyword guess (for example, a file with "media" in its name maps to Media) is a heuristic and can be wrong.
 - Print terminal text, Markdown or JSON.
 - Compare two JSON reports and exit 1 when a build got worse, so CI can gate on it.
 
@@ -74,7 +74,7 @@ It does not:
 
 - Use machine learning. The rules are regular expressions in `Sources/BuildWatch/LogClassifier.swift`.
 - Upload your log anywhere. The CLI reads local files. The web demo runs the same rules in your browser and does not run the owner lookup.
-- Know your team. Owner guesses are only as good as your CODEOWNERS file and git history.
+- Know your team. The "likely owner" line is a guess. Without a CODEOWNERS file or override file it comes from a filename keyword match, so treat it as a hint about who to ask first.
 - Replace a CI dashboard. It gives a first answer for one failed build.
 
 ## More
@@ -90,7 +90,7 @@ It does not:
 
 ```bash
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
-buildwatch run: <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
+buildwatch run [--format terminal|json|markdown] [--owners auto|off] -- <command> [args...]
 buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
 buildwatch simulate [--workers N]
 buildwatch version
@@ -102,7 +102,7 @@ Examples:
 buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
 buildwatch analyze fixtures/make-linker-error.log
 buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
-buildwatch run: make test
+buildwatch run -- make test
 buildwatch simulate
 buildwatch simulate --workers 1
 buildwatch version
@@ -116,10 +116,11 @@ buildwatch compare yesterday.json today.json
 
 </details>
 
-<details>
-<summary>Install a binary or build a release</summary>
+## Install
 
 #### Download binary (macOS)
+
+The release binary is arm64 only (Apple silicon) and is not notarized. macOS may block it on first run. Build from source if you are on an Intel Mac or do not want to bypass that check.
 
 Download the latest release zip from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
 
@@ -145,8 +146,6 @@ Run from source:
 swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 ```
 
-</details>
-
 <details>
 <summary>Failure categories</summary>
 
@@ -158,7 +157,7 @@ swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 | `linker_error` | undefined symbols, duplicate symbol, linker command failed |
 | `test_failure` | XCTest assertion or `** TEST FAILED **` |
 | `flaky_test_candidate` | async timeout or intermittent signal |
-| `simulator_failure` | CoreSimulator or simctl boot timeout |
+| `simulator_failure` | CoreSimulator failure or simctl boot timeout |
 | `code_signing_failure` | provisioning profile or signing certificate |
 | `missing_dependency` | no such module, package resolution failed |
 | `timeout` | build or command timed out, SIGKILL |
@@ -220,7 +219,7 @@ buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
 - `compare`: build-over-build diff between two JSON reports (regressed/resolved/persisting/changed), exits 1 on regression for CI gating
 - Markdown, JSON, and terminal output
 - build command wrapper for `make`, `xcodebuild`, or generic shell commands
-- distributed build scheduler simulation with a fixed worker pool, critical path, and retry accounting: a constrained worker pool can queue jobs and push the total past the dependency-only critical path
+- `simulate`: a toy model of a build scheduler. It runs 5 hardcoded sample jobs on a fixed worker pool and reports total time and critical path. It does not read your real builds and is not a distributed scheduler
 - fixtures for compiler, linker, simulator, and test failures
 - Swift XCTest coverage for the classifier, stack parser, and scheduler
 - `version` command: prints build version and platform info
@@ -256,7 +255,7 @@ ReportWriter
   - json
 ```
 
-The repo also includes `SchedulerSimulation`, a small local model of distributed build execution. It tracks dependencies, retries infrastructure-sensitive jobs, and reports the critical path.
+The repo also includes `SchedulerSimulation`, a toy model over 5 hardcoded sample jobs. It is a demo of dependency and worker-pool scheduling, not a model of any real build system.
 
 </details>
 
