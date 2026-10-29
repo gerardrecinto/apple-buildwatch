@@ -285,3 +285,5 @@ swift test
 ## License
 
 MIT
+
+Optional paid help: [scoped reviews and setup](SUPPORT.md).
