@@ -127,7 +127,8 @@ Future releases made by this repository's release workflow publish both files.
 For such a release, run this from a checkout of the repository:
 
 ```bash
-read -r -p "Release tag with SHA256SUMS: " buildwatch_tag
+printf 'Release tag with SHA256SUMS: '
+read -r buildwatch_tag
 scripts/install-release.sh "$buildwatch_tag"
 ```
 
