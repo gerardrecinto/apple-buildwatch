@@ -155,7 +155,7 @@ td.p{font:12px ui-monospace,monospace;overflow-wrap:anywhere;min-width:220px}
 
 <section id="rules"><div class="wrap">
   <h2>The rules</h2>
-  <p class="pw">In plain words: the tool checks the log against a short list of known problems, top to bottom, and stops at the first one that fits.</p>
+  <p class="pw">Put simply: the tool checks the log against a short list of known problems, top to bottom, and stops at the first one that fits.</p>
   <p class="sub" id="rn">Loading...</p>
   <div class="tw" style="max-height:520px;overflow:auto" tabindex="0" role="region" aria-label="Rule table, scrollable"><table><thead><tr><th>Order</th><th>Kind</th><th>Confidence</th><th>Pattern</th></tr></thead><tbody id="rt"></tbody></table></div>
 </div></section>
@@ -168,7 +168,7 @@ cd apple-buildwatch
 swift run buildwatch analyze fixtures/xcodebuild-test-failure.log</pre><button type="button" class="copy" data-c="qs" aria-label="Copy quick start commands">Copy</button></div>
   <p class="note">Prefer a binary? The <a href="https://github.com/gerardrecinto/apple-buildwatch#install">README</a> has the release download.</p>
   <details class="more"><summary>Compare two builds and other formats</summary>
-    <p class="pw">In plain words: this checks whether a build got better, got worse, or stayed the same since last time.</p>
+    <p class="pw">Put simply: this checks whether a build got better, got worse, or stayed the same since last time.</p>
     <div class="pre"><pre id="more">swift run buildwatch analyze fixtures/xcodebuild-test-failure.log --format json > old.json
 swift run buildwatch analyze fixtures/make-linker-error.log --format json > new.json
 swift run buildwatch compare old.json new.json</pre><button type="button" class="copy" data-c="more" aria-label="Copy compare commands">Copy</button></div>

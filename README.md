@@ -3,7 +3,7 @@
 ![CI](https://github.com/gerardrecinto/apple-buildwatch/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-*In plain words: when a software build breaks, this tool reads the error log and tells you what went wrong and who to ask.*
+*Put simply: when a software build breaks, this tool reads the error log and tells you what went wrong and who to ask.*
 
 A Swift command-line tool that reads a failed `xcodebuild`, XCTest or `make` log and tells you what kind of failure it was, the lines that show it, who likely owns it, and what to try next. It is for people who triage broken CI builds.
 
@@ -86,7 +86,7 @@ It does not:
 <details>
 <summary>All commands</summary>
 
-*In plain words: `compare` checks whether a build got better, got worse, or stayed the same since last time.*
+*Put simply: `compare` checks whether a build got better, got worse, or stayed the same since last time.*
 
 ```bash
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
@@ -150,7 +150,7 @@ swift run buildwatch analyze fixtures/xcodebuild-compiler-error.log
 <details>
 <summary>Failure categories</summary>
 
-*In plain words: these are the ten kinds of problem the tool can name. A flaky test is one that fails sometimes for no clear reason.*
+*Put simply: these are the ten kinds of problem the tool can name. A flaky test is one that fails sometimes for no clear reason.*
 
 | Category | Example signal |
 |---|---|
@@ -172,7 +172,7 @@ See [docs/failure-taxonomy.md](docs/failure-taxonomy.md).
 <details>
 <summary>Ownership resolution</summary>
 
-*In plain words: the tool makes its best guess at which team should fix the problem, and says so when it cannot tell.*
+*Put simply: the tool makes its best guess at which team should fix the problem, and says so when it cannot tell.*
 
 `buildwatch` tries to answer "who likely owns this failure," not just "what failed." It resolves an owner in this order, stopping at the first match:
 
