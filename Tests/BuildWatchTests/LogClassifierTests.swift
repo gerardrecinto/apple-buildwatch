@@ -58,6 +58,24 @@ final class LogClassifierTests: XCTestCase {
         XCTAssertEqual(result.failureKind, .testFailure)
     }
 
+    func testSpecificDependencyErrorsWinBeforeGenericCompilerError() {
+        for log in [
+            "Sources/App.swift:1:8: error: no such module 'Payments'",
+            "error: package resolution failed: could not resolve package",
+            "error: module not found: Analytics"
+        ] {
+            let result = LogClassifier().analyze(log: log)
+            XCTAssertEqual(result.failureKind, .missingDependency, log)
+            XCTAssertEqual(result.evidence.first?.text, log)
+            XCTAssertTrue(result.suggestedAction.contains("package resolution"))
+        }
+    }
+
+    func testCompilerErrorsStillClassifyWhenNoDependencySignalExists() {
+        let result = LogClassifier().analyze(log: "Sources/App.swift:9:4: error: cannot convert value of type 'Int' to expected argument type 'String'")
+        XCTAssertEqual(result.failureKind, .compilerError)
+    }
+
     func testDurationsDoNotLookLikeHttpErrors() {
         let result = LogClassifier().analyze(log: "Executed 12 tests in 0.403 seconds\n")
 

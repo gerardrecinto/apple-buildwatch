@@ -282,6 +282,16 @@ swift build
 swift test
 ```
 
+The browser demo is built from the Swift rule table. To run its automated
+sample, failure-recovery, keyboard, and accessibility checks in Chromium,
+Firefox, and WebKit, install Node.js 22 or later and Python 3, then run:
+
+```bash
+npm ci
+npx playwright install --with-deps
+npm run test:site
+```
+
 ## License
 
 MIT

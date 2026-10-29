@@ -46,18 +46,18 @@ public struct LogClassifier: Sendable {
             confidence: 0.93
         ),
         Rule(
-            kind: .compilerError,
-            pattern: #"(?i)(error:|use of unresolved identifier|cannot find|cannot convert value|no member named|SwiftCompile failed)"#,
-            summary: "The compiler found a source or module issue.",
-            action: "Inspect the first compiler error, imports, module visibility, generated files, and recent source changes.",
-            confidence: 0.89
-        ),
-        Rule(
             kind: .missingDependency,
             pattern: #"(?i)(No such module|package resolution failed|could not resolve package|module not found|No rule to make target)"#,
             summary: "A dependency or build target is missing.",
             action: "Check package resolution, workspace setup, Makefile target names, and artifact availability.",
             confidence: 0.88
+        ),
+        Rule(
+            kind: .compilerError,
+            pattern: #"(?i)(error:|use of unresolved identifier|cannot find|cannot convert value|no member named|SwiftCompile failed)"#,
+            summary: "The compiler found a source or module issue.",
+            action: "Inspect the first compiler error, imports, module visibility, generated files, and recent source changes.",
+            confidence: 0.89
         ),
         Rule(
             kind: .networkFailure,

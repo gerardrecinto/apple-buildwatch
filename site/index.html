@@ -43,7 +43,7 @@ nav .links a:hover{color:var(--fg)}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
 .btn.primary{background:#22c55e;border-color:#22c55e;color:#052e16}
 .btn.primary:hover{background:#4ade80}
-.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #22c55e;outline-offset:2px}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 .hero{padding:72px 0 40px;text-align:center}
 .pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
 h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
@@ -125,6 +125,7 @@ tr.win td:first-child{box-shadow:inset 3px 0 var(--brand)}
 .sim{display:inline-block;font:700 11px ui-monospace,monospace;color:var(--brand);background:var(--brand-bg);padding:2px 8px;border-radius:6px;margin-left:8px;letter-spacing:0;text-transform:none}
 td.p{font:12px ui-monospace,monospace;overflow-wrap:anywhere;min-width:220px}
 </style>
+<noscript><style>.lab,#rn,.tw,.copy{display:none}.pre pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></noscript>
 </head>
 <body>
 <a class="skip" href="#try">Skip to the log triage</a>
@@ -146,11 +147,12 @@ td.p{font:12px ui-monospace,monospace;overflow-wrap:anywhere;min-width:220px}
   <p class="sub">Pick a sample or paste your own log. The first rule with a matching line wins, and those lines are the evidence.</p>
   <div class="lab">
     <div class="card"><h3><span>build.log</span></h3>
-      <div class="tools2" id="smp" role="group" aria-label="Sample logs"><button type="button" class="chip" data-s="test" aria-pressed="true">Test failure</button><button type="button" class="chip" data-s="compiler" aria-pressed="false">Compiler error</button><button type="button" class="chip" data-s="linker" aria-pressed="false">Linker error</button><button type="button" class="chip" data-s="sim" aria-pressed="false">Simulator timeout</button><button type="button" class="chip" data-s="timeout" aria-pressed="false">Build timeout</button></div>
-      <label class="sr" for="log">Build log</label><textarea class="in" id="log" spellcheck="false" wrap="off"></textarea></div>
+      <div class="tools2" id="smp" role="group" aria-label="Sample logs"><button type="button" class="chip" data-s="test" aria-pressed="true" disabled>Test failure</button><button type="button" class="chip" data-s="compiler" aria-pressed="false" disabled>Compiler error</button><button type="button" class="chip" data-s="linker" aria-pressed="false" disabled>Linker error</button><button type="button" class="chip" data-s="sim" aria-pressed="false" disabled>Simulator timeout</button><button type="button" class="chip" data-s="timeout" aria-pressed="false" disabled>Build timeout</button></div>
+      <label class="sr" for="log">Build log</label><textarea class="in" id="log" spellcheck="false" wrap="off" disabled></textarea></div>
     <div class="card" id="rep"><h3><span>Triage <span class="sim">SAME RULES, JS REGEX</span></span></h3><div class="status" id="boot">Loading the rules...</div></div>
     <div class="sr" role="status" id="live"></div>
   </div>
+  <noscript id="demo-fallback"><p>The browser demo needs JavaScript. Use the <a href="#install">CLI commands below</a> to triage a log locally.</p></noscript>
 </div></section>
 
 <section id="rules"><div class="wrap">
@@ -163,13 +165,13 @@ td.p{font:12px ui-monospace,monospace;overflow-wrap:anywhere;min-width:220px}
 <section id="install" class="install"><div class="wrap">
   <h2>Run it</h2>
   <p class="sub">Needs macOS 14 or later and a Swift 6 toolchain. This builds the tool and triages a sample log.</p>
-  <div class="pre"><pre id="qs">git clone https://github.com/gerardrecinto/apple-buildwatch.git
+  <div class="pre"><pre id="qs" tabindex="0" role="region" aria-label="Quick start commands, scrollable">git clone https://github.com/gerardrecinto/apple-buildwatch.git
 cd apple-buildwatch
 swift run buildwatch analyze fixtures/xcodebuild-test-failure.log</pre><button type="button" class="copy" data-c="qs" aria-label="Copy quick start commands">Copy</button></div>
-  <p class="note">Prefer a binary? The <a href="https://github.com/gerardrecinto/apple-buildwatch#install">README</a> has the release download.</p>
+  <p class="note">Prefer a binary? The <a href="https://github.com/gerardrecinto/apple-buildwatch#download-binary-macos">README</a> has the release download.</p>
   <details class="more"><summary>Compare two builds and other formats</summary>
     <p class="pw">This checks whether a build got better, got worse, or stayed the same since last time.</p>
-    <div class="pre"><pre id="more">swift run buildwatch analyze fixtures/xcodebuild-test-failure.log --format json > old.json
+    <div class="pre"><pre id="more" tabindex="0" role="region" aria-label="Compare commands, scrollable">swift run buildwatch analyze fixtures/xcodebuild-test-failure.log --format json > old.json
 swift run buildwatch analyze fixtures/make-linker-error.log --format json > new.json
 swift run buildwatch compare old.json new.json</pre><button type="button" class="copy" data-c="more" aria-label="Copy compare commands">Copy</button></div>
     <p class="note">Output can also be <code>--format markdown</code>. <code>compare</code> exits 1 when a build got worse.</p>
@@ -210,6 +212,15 @@ swift run buildwatch compare old.json new.json</pre><button type="button" class=
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => done("Copied"), () => { const r = document.createRange(); r.selectNodeContents($(b.dataset.c)); getSelection().removeAllRanges(); getSelection().addRange(r); done("Press Cmd+C"); });
   }));
   const SAMPLES = {};
+  // WebKit does not consistently scroll focused regions with arrow keys.
+  document.querySelectorAll('pre[tabindex], .tw[tabindex]').forEach((region) => {
+    region.addEventListener('keydown', (event) => {
+      if (event.target !== region || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      if (region.scrollWidth <= region.clientWidth) return;
+      event.preventDefault();
+      region.scrollLeft += event.key === 'ArrowRight' ? 40 : -40;
+    });
+  });
 
   function run() {
     if (!rules.length) return; const lines = $("log").value.split("\n"), head = '<h3><span>Triage <span class="sim">SAME RULES, JS REGEX</span></span></h3>';
@@ -231,8 +242,14 @@ swift run buildwatch compare old.json new.json</pre><button type="button" class=
     rules = rs.map((r) => ({ ...r, re: mk(r.pattern) }));
     $("rn").textContent = rules.length + " rules, read from LogClassifier.swift at deploy time, in the order the Swift tool checks them. Order matters: a code signing error is checked before a generic compiler error.";
     $("rt").innerHTML = rules.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.kind)}</td><td>${Math.round(r.confidence * 100)}%</td><td class="p">${esc(r.pattern)}</td></tr>`).join("");
+    $("log").disabled = false;
+    document.querySelectorAll("[data-s]").forEach((b) => (b.disabled = false));
     $("log").value = SAMPLES.test; window.__BW_READY__ = true; run();
-  }).catch(() => { $("boot").textContent = "The rule table did not load. The README lists the failure kinds."; });
+  }).catch(() => {
+    $("boot").textContent = "The rules or sample logs could not load. Reload this page or use the CLI commands below.";
+    $("rn").textContent = "The rule table is unavailable. Run the CLI locally to see its diagnosis.";
+    $("live").textContent = "The demo could not load. Use the CLI commands below.";
+  });
 
 })();
 </script>
