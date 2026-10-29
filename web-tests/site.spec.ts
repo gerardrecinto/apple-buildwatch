@@ -71,8 +71,8 @@ test('without JavaScript, the page explains the fallback and keeps CLI commands 
   const context = await browser.newContext({ javaScriptEnabled: false, viewport });
   const page = await context.newPage();
   await page.goto(baseURL!);
-  await expect(page.locator('body noscript p')).toContainText('browser demo needs JavaScript');
-  await expect(page.locator('body noscript a')).toHaveAttribute('href', '#install');
+  await expect(page.locator('#demo-fallback p')).toContainText('browser demo needs JavaScript');
+  await expect(page.locator('#demo-fallback a')).toHaveAttribute('href', '#install');
   await expect(page.locator('#qs')).toContainText('swift run buildwatch');
   await expect(page.locator('#smp button').first()).toBeDisabled();
   await expect(page.locator('#boot')).toBeHidden();
