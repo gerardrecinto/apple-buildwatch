@@ -27,7 +27,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site/fixtures
-          cp site/index.html _site/
+          cp site/index.html site/og.png site/robots.txt site/sitemap.xml _site/
           cp fixtures/*.log _site/fixtures/
           python3 - <<'PY'
           import json, re
