@@ -5,6 +5,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -66,11 +67,16 @@ class ReleaseInstallationTests(unittest.TestCase):
         source, _ = self.package()
         blocks = re.findall(r'```bash\n(.*?)```', (ROOT / 'README.md').read_text(), re.S)
         install_block = next(block for block in blocks if 'scripts/install-release.sh' in block)
-        result = subprocess.run(['bash', '-ec', install_block], input='v9.9.9\n', cwd=ROOT, env=self.environment, text=True, capture_output=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.existing.read_bytes(), source.read_bytes())
-        self.assertTrue(os.access(self.existing, os.X_OK))
-        self.assertIn('after checksum verification', result.stdout)
+        shells = ['bash', 'sh']
+        if shutil.which('zsh'):
+            shells.append('zsh')
+        for shell in shells:
+            with self.subTest(shell=shell):
+                result = subprocess.run([shell, '-ec', install_block], input='v9.9.9\n', cwd=ROOT, env=self.environment, text=True, capture_output=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.existing.read_bytes(), source.read_bytes())
+                self.assertTrue(os.access(self.existing, os.X_OK))
+                self.assertIn('after checksum verification', result.stdout)
 
     def test_uppercase_checksum_is_accepted(self):
         source, output = self.package()
