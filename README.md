@@ -295,3 +295,5 @@ npm run test:site
 ## License
 
 MIT
+
+Optional paid help: [scoped reviews and setup](SUPPORT.md).
