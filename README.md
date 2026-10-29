@@ -11,7 +11,7 @@ Live demo of the rules in your browser: https://gerardrecinto.github.io/apple-bu
 
 ![demo](docs/assets/demo.gif)
 
-## Try a sample
+## Try it in 60 seconds
 
 You need macOS 14 or later and a Swift 6 toolchain (Xcode 16 or later). The first run compiles the project, which takes a little while.
 
@@ -90,7 +90,7 @@ It does not:
 
 ```bash
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
-buildwatch run [--format terminal|json|markdown] [--owners auto|off] -- <command> [args...]
+buildwatch run: <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
 buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
 buildwatch simulate [--workers N]
 buildwatch version
@@ -102,7 +102,7 @@ Examples:
 buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
 buildwatch analyze fixtures/make-linker-error.log
 buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
-buildwatch run -- make test
+buildwatch run: make test
 buildwatch simulate
 buildwatch simulate --workers 1
 buildwatch version
