@@ -32,14 +32,17 @@ jobs:
       - name: Run tests
         run: swift test
 
-      - name: Package binary
-        run: |
-          cp .build/release/buildwatch ./buildwatch
-          zip buildwatch-macos.zip buildwatch
+      - name: Check release packaging and verified installation
+        run: python3 -m unittest discover -s scripts -p 'test_release_install.py' -v
+
+      - name: Package binary and checksums
+        run: scripts/package-release.sh
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           generate_release_notes: true
-          files: buildwatch-macos.zip
+          files: |
+            buildwatch-macos.zip
+            SHA256SUMS
