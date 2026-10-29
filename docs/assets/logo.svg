@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="920" height="240" viewBox="0 0 920 240" role="img" aria-labelledby="title desc">
   <title id="title">apple-buildwatch logo</title>
-  <desc id="desc">Terminal styled logo for a build observability CLI</desc>
+  <desc id="desc">Terminal styled logo for a build log triage CLI</desc>
   <rect width="920" height="240" rx="28" fill="#0b1220"/>
   <rect x="34" y="34" width="852" height="172" rx="18" fill="#111827" stroke="#334155" stroke-width="2"/>
   <circle cx="66" cy="62" r="8" fill="#ef4444"/>

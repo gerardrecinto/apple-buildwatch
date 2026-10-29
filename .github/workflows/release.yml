@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   release:
@@ -22,8 +21,10 @@ jobs:
 
       - name: Resolve version
         id: ver
+        env:
+          RAW_VERSION: ${{ github.event.inputs.version || github.ref_name }}
         run: |
-          raw="${{ github.event.inputs.version || github.ref_name }}"
+          raw="$RAW_VERSION"
           echo "version=${raw#v}" >> "$GITHUB_OUTPUT"
 
       - name: Build release binary
@@ -38,7 +39,7 @@ jobs:
           zip buildwatch-macos.zip buildwatch
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
         with:
           tag_name: v${{ steps.ver.outputs.version }}
           generate_release_notes: true

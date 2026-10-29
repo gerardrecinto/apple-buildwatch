@@ -19,7 +19,7 @@ public struct LogClassifier: Sendable {
         ),
         Rule(
             kind: .simulatorFailure,
-            pattern: #"(?i)(simctl|CoreSimulator|Simulator.*timed out|failed to boot simulator)"#,
+            pattern: #"(?i)(simctl\b.*(failed|timed out|error)|CoreSimulator(Service)? (failed|error|timed out|is not available|connection)|Simulator.*timed out|failed to boot simulator|unable to boot (the )?(device|simulator))"#,
             summary: "Simulator infrastructure failed before tests could complete.",
             action: "Reset the simulator runtime, verify destination availability, and retry once before routing to product code.",
             confidence: 0.90
