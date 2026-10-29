@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apple-buildwatch: from build failure to next action</title>
+<meta name="description" content="Paste a build log and see which of the Swift tool’s ordered rules match, the evidence lines, and the suggested action. The rule table is read from the source.">
+<meta property="og:description" content="Paste a build log and see which of the Swift tool’s ordered rules match, the evidence lines, and the suggested action. The rule table is read from the source.">
+<meta name="theme-color" content="#22c55e">
+<link rel="canonical" href="https://gerardrecinto.github.io/apple-buildwatch/">
+<meta property="og:site_name" content="apple-buildwatch">
+<meta property="og:title" content="apple-buildwatch: from build failure to next action">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gerardrecinto.github.io/apple-buildwatch/">
+<meta property="og:image" content="https://gerardrecinto.github.io/apple-buildwatch/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Terminal output: buildwatch analyze build.log reports failure test_failure, confidence 91%, with the matching evidence lines.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="apple-buildwatch: from build failure to next action">
+<meta name="twitter:description" content="Paste a build log and see which of the Swift tool’s ordered rules match, the evidence lines, and the suggested action.">
+<meta name="twitter:image" content="https://gerardrecinto.github.io/apple-buildwatch/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2322c55e'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+
+:root{--bg:#f8fafc;--panel:#fff;--panel2:#f1f5f9;--line:#e2e8f0;--fg:#0f172a;--mute:#475569;--brand:#15803d;--brand-bg:#dcfce7;--ok:#047857;--ok-bg:#d1fae5;--err:#b91c1c;--err-bg:#fee2e2;--code:#0b1220;--code-fg:#e2e8f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#4ade80;--brand-bg:#052e16;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}}
+:root[data-theme=dark]{--bg:#070d1a;--panel:#0d1526;--panel2:#111c33;--line:#1e2b47;--fg:#e8eefc;--mute:#9fb0cc;--brand:#4ade80;--brand-bg:#052e16;--ok:#34d399;--ok-bg:#06382b;--err:#fca5a5;--err-bg:#3b1212}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--brand)}
+code,pre,textarea,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--fg);text-decoration:none}
+.logo i{width:22px;height:22px;border-radius:6px;background:#22c55e;display:inline-block}
+nav .links{display:flex;gap:18px;align-items:center;font-size:14px}
+nav .links a{color:var(--mute);text-decoration:none}
+nav .links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid var(--line);color:var(--fg);background:var(--panel);cursor:pointer;font-size:15px}
+.btn.primary{background:#22c55e;border-color:#22c55e;color:#052e16}
+.btn.primary:hover{background:#4ade80}
+.btn:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid #22c55e;outline-offset:2px}
+.hero{padding:72px 0 40px;text-align:center}
+.pill{display:inline-block;font-size:13px;color:var(--brand);background:var(--brand-bg);padding:4px 12px;border-radius:99px;margin-bottom:20px;font-weight:600}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px;letter-spacing:-.02em}
+h1 em{font-style:normal;color:var(--brand)}
+.lede{max-width:700px;margin:0 auto 28px;color:var(--mute);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+section{padding:56px 0}
+h2{font-size:clamp(26px,4vw,36px);margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 28px;max-width:720px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lab{grid-template-columns:minmax(0,1fr)}nav .links .hide-s{display:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.card h3{margin:0;padding:12px 16px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 12px system-ui;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);cursor:pointer;text-transform:none;letter-spacing:0}
+.chip[aria-pressed=true]{background:var(--brand-bg);border-color:var(--brand);color:var(--brand)}
+#log{display:block;width:100%;height:420px;border:0;padding:12px 14px;font-size:12.5px;line-height:1.55;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto}
+.src{display:flex;gap:8px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-size:13px;color:var(--mute);flex-wrap:wrap}
+.out{min-height:420px}
+.status{padding:16px;color:var(--mute);font-size:14px}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.site{padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.site:last-child{border:0}
+.site code{background:var(--panel2);padding:1px 6px;border-radius:5px;font-size:12px}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.tw{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow-x:auto;max-width:100%}
+table{width:100%;min-width:560px;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);background:var(--panel2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-family:ui-monospace,monospace;font-weight:700;white-space:nowrap}
+.install pre{background:var(--code);color:var(--code-fg);padding:16px;border-radius:12px;overflow-x:auto;font-size:13.5px;margin:0 0 12px}
+.limits{background:var(--panel);border:1px solid var(--line);border-left:4px solid #f59e0b;border-radius:10px;padding:16px 20px}
+.limits ul{margin:8px 0 0;padding-left:20px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--mute);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:8px;top:-60px;z-index:10;background:var(--panel);color:var(--fg);padding:8px 14px;border-radius:8px;border:1px solid var(--line)}
+.skip:focus{top:8px}
+.pre{position:relative}
+.pre pre{padding-right:76px}
+.copy{position:absolute;top:8px;right:8px;font:600 12px system-ui;padding:5px 10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;cursor:pointer}
+.copy:hover{background:#334155}
+.tools2{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+tr.hit td{background:var(--brand-bg)}
+tr.win td:first-child{box-shadow:inset 3px 0 var(--brand)}
+.lbl{font-size:13px;color:var(--mute);margin:0 0 6px}
+.pw{font-size:13px;color:var(--mute);margin:0 0 10px;font-style:italic}
+.alt{margin-left:6px;padding:10px 6px;font-weight:600}
+.more{margin-top:16px}.more summary{cursor:pointer;color:var(--mute);margin-bottom:10px}
+@media (max-width:860px){.in{font-size:16px}}
+.btn,.chip,.copy,.alt{transition:transform .18s ease-out,background-color .18s ease-out,border-color .18s ease-out}
+.btn:hover{transform:translateY(-2px)}
+.chip:hover{transform:translateY(-1px)}
+.js .rv{opacity:0;transform:translateY(20px);transition:opacity .55s ease-out,transform .55s ease-out}
+.js .rv.on{opacity:1;transform:none}
+@supports (animation-timeline:view()){
+@keyframes heroOut{to{opacity:.35;transform:scale(.96)}}
+.hero .wrap{animation:heroOut linear both;animation-timeline:view();animation-range:exit 0% exit 70%}
+}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none}.btn:hover,.chip:hover{transform:none}.hero .wrap{animation:none}}
+
+.in{display:block;width:100%;height:300px;border:0;padding:12px 14px;font:12.5px/1.55 ui-monospace,monospace;background:var(--code);color:var(--code-fg);resize:vertical;white-space:pre;overflow:auto}
+.vd{padding:16px;border-bottom:1px solid var(--line);background:var(--err-bg)}
+.vd.unknown{background:var(--panel2)}
+.vd b{display:block;font-size:20px;text-transform:uppercase;letter-spacing:.04em;color:var(--err)}
+.vd.unknown b{color:var(--mute)}
+.vd span{font-size:14px;color:var(--mute)}
+.bar{height:10px;border-radius:99px;background:var(--panel2);overflow:hidden;max-width:260px;display:inline-block;vertical-align:middle;margin-right:10px;width:60%}
+.bar i{display:block;height:100%;background:var(--brand)}
+.fix{background:var(--ok-bg);color:var(--ok);padding:10px 12px;border-radius:8px;font-size:14px}
+.m{display:flex;gap:8px;align-items:baseline;padding:5px 0;font-size:13.5px;flex-wrap:wrap}
+.m .t{font:700 11px ui-monospace,monospace;padding:2px 8px;border-radius:6px;background:var(--panel2);color:var(--mute)}
+.m .t.w{background:var(--brand-bg);color:var(--brand)}
+.ev{font:12px ui-monospace,monospace;background:var(--panel2);padding:4px 8px;border-radius:6px;margin:3px 0;overflow-wrap:anywhere}
+.ev i{color:var(--mute);font-style:normal;margin-right:8px}
+.sim{display:inline-block;font:700 11px ui-monospace,monospace;color:var(--brand);background:var(--brand-bg);padding:2px 8px;border-radius:6px;margin-left:8px;letter-spacing:0;text-transform:none}
+td.p{font:12px ui-monospace,monospace;overflow-wrap:anywhere;min-width:220px}
+</style>
+</head>
+<body>
+<a class="skip" href="#try">Skip to the log triage</a>
+<nav><div class="wrap">
+  <a class="logo" href="#top"><i></i>apple-buildwatch</a>
+  <div class="links"><a href="#try" class="hide-s">Try it</a><a href="#rules" class="hide-s">Rules</a><a href="#install" class="hide-s">Install</a><a class="btn" href="https://github.com/gerardrecinto/apple-buildwatch">GitHub</a></div>
+</div></nav>
+
+<main>
+<header class="hero" id="top"><div class="wrap">
+  <span class="pill">Open source. Rules-based, not ML. Nothing is uploaded.</span>
+  <h1>Paste a failed build log. Get the cause and a next step.</h1>
+  <p class="lede">A Swift tool for engineers who triage failed Xcode and make builds in CI. This page runs its rules in your browser.</p>
+  <div class="cta"><a class="btn primary" href="#try">Triage a log in your browser</a><a class="alt" href="#install">or run the CLI</a></div>
+</div></header>
+
+<section id="try"><div class="wrap">
+  <h2>Try it</h2>
+  <p class="sub">Pick a sample or paste your own log. The first rule with a matching line wins, and those lines are the evidence.</p>
+  <div class="lab">
+    <div class="card"><h3><span>build.log</span></h3>
+      <div class="tools2" id="smp" role="group" aria-label="Sample logs"><button type="button" class="chip" data-s="test" aria-pressed="true">Test failure</button><button type="button" class="chip" data-s="compiler" aria-pressed="false">Compiler error</button><button type="button" class="chip" data-s="linker" aria-pressed="false">Linker error</button><button type="button" class="chip" data-s="sim" aria-pressed="false">Simulator timeout</button><button type="button" class="chip" data-s="timeout" aria-pressed="false">Build timeout</button></div>
+      <label class="sr" for="log">Build log</label><textarea class="in" id="log" spellcheck="false" wrap="off"></textarea></div>
+    <div class="card" id="rep"><h3><span>Triage <span class="sim">SAME RULES, JS REGEX</span></span></h3><div class="status" id="boot">Loading the rules...</div></div>
+    <div class="sr" role="status" id="live"></div>
+  </div>
+</div></section>
+
+<section id="rules"><div class="wrap">
+  <h2>The rules</h2>
+  <p class="pw">The tool checks the log against a short list of known problems, top to bottom, and stops at the first one that fits.</p>
+  <p class="sub" id="rn">Loading...</p>
+  <div class="tw" style="max-height:520px;overflow:auto" tabindex="0" role="region" aria-label="Rule table, scrollable"><table><thead><tr><th>Order</th><th>Kind</th><th>Confidence</th><th>Pattern</th></tr></thead><tbody id="rt"></tbody></table></div>
+</div></section>
+
+<section id="install" class="install"><div class="wrap">
+  <h2>Run it</h2>
+  <p class="sub">Needs macOS 14 or later and a Swift 6 toolchain. This builds the tool and triages a sample log.</p>
+  <div class="pre"><pre id="qs">git clone https://github.com/gerardrecinto/apple-buildwatch.git
+cd apple-buildwatch
+swift run buildwatch analyze fixtures/xcodebuild-test-failure.log</pre><button type="button" class="copy" data-c="qs" aria-label="Copy quick start commands">Copy</button></div>
+  <p class="note">Prefer a binary? The <a href="https://github.com/gerardrecinto/apple-buildwatch#install">README</a> has the release download.</p>
+  <details class="more"><summary>Compare two builds and other formats</summary>
+    <p class="pw">This checks whether a build got better, got worse, or stayed the same since last time.</p>
+    <div class="pre"><pre id="more">swift run buildwatch analyze fixtures/xcodebuild-test-failure.log --format json > old.json
+swift run buildwatch analyze fixtures/make-linker-error.log --format json > new.json
+swift run buildwatch compare old.json new.json</pre><button type="button" class="copy" data-c="more" aria-label="Copy compare commands">Copy</button></div>
+    <p class="note">Output can also be <code>--format markdown</code>. <code>compare</code> exits 1 when a build got worse.</p>
+  </details>
+</div></section>
+
+<section><div class="wrap">
+  <div class="limits"><strong>What this page does not do</strong><ul>
+    <li>It re-runs the rule table only. Stack frames, git context and owner lookup need the CLI and your repo.</li>
+    <li>Confidence is a fixed number per rule, not a measured accuracy.</li>
+    <li>If two rules match, the earlier one wins. The page lists every rule that matched.</li>
+  </ul></div>
+</div></section>
+
+</main>
+
+<footer><div class="wrap">
+  <span>apple-buildwatch. MIT licensed. Built by <a href="https://github.com/gerardrecinto">Gerard Recinto</a>.</span>
+  <span><a href="https://github.com/gerardrecinto/apple-buildwatch">Source</a> &middot; <a href="https://github.com/gerardrecinto/apple-buildwatch/releases">Releases</a></span>
+</div></footer>
+
+<script>
+(() => {
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const track = (n) => { try { if (window.plausible) window.plausible(n); } catch (e) {} };
+  const mk = (p) => { try { return new RegExp(p.replace(/^\(\?i\)/, ""), /^\(\?i\)/.test(p) ? "i" : ""); } catch (e) { return null; } };
+  let rules = [], timer = null;
+  if (matchMedia("(prefers-reduced-motion:no-preference)").matches && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("js");
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } }), { threshold: 0.05 });
+    document.querySelectorAll("main > section .wrap > *").forEach((el) => { if (el.getBoundingClientRect().top > innerHeight) { el.classList.add("rv"); io.observe(el); } });
+  }
+  document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", () => {
+    const t = $(b.dataset.c).textContent;
+    const done = (m) => { b.textContent = m; setTimeout(() => (b.textContent = "Copy"), 1600); };
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => done("Copied"), () => { const r = document.createRange(); r.selectNodeContents($(b.dataset.c)); getSelection().removeAllRanges(); getSelection().addRange(r); done("Press Cmd+C"); });
+  }));
+  const SAMPLES = {};
+
+  function run() {
+    if (!rules.length) return; const lines = $("log").value.split("\n"), head = '<h3><span>Triage <span class="sim">SAME RULES, JS REGEX</span></span></h3>';
+    const hits = rules.map((r, i) => ({ r, i, ev: lines.map((l, n) => (r.re && r.re.test(l) ? { n: n + 1, l } : null)).filter(Boolean) })).filter((h) => h.ev.length);
+    const win = hits[0], live = $("live");
+    document.querySelectorAll("#rt tr").forEach((tr, i) => { tr.className = hits.some((h) => h.i === i) ? (win && win.i === i ? "hit win" : "hit") : ""; });
+    if (!win) { const ok = /BUILD SUCCEEDED/i.test($("log").value); $("rep").innerHTML = head + `<div class="vd unknown"><b>${ok ? "passed" : "unknown"}</b><span>${ok ? "The log reports BUILD SUCCEEDED." : "No high-confidence failure rule matched this log."}</span></div><div class="sec"><h4>Confidence</h4><span class="bar"><i style="width:${ok ? 0 : 30}%"></i></span><b>${ok ? "-" : "30%"}</b></div>${ok ? "" : `<div class="sec"><h4>Evidence (first 5 non-empty lines)</h4>${lines.map((l, n) => ({ n: n + 1, l })).filter((e) => e.l.trim()).slice(0, 5).map((e) => `<div class="ev"><i>line ${e.n}</i>${esc(e.l)}</div>`).join("")}</div>`}`; live.textContent = ok ? "Passed" : "Unknown failure"; return; }
+    live.textContent = win.r.kind.replace(/_/g, " ") + ", " + Math.round(win.r.confidence * 100) + " percent confidence";
+    $("rep").innerHTML = head + `<div class="vd"><b>${esc(win.r.kind.replace(/_/g, " "))}</b><span>${esc(win.r.summary)}</span></div>
+      <div class="sec"><h4>Confidence</h4><span class="bar"><i style="width:${Math.round(win.r.confidence * 100)}%"></i></span><b>${Math.round(win.r.confidence * 100)}%</b></div>
+      <div class="sec"><h4>Suggested action</h4><div class="fix">${esc(win.r.action)}</div></div>
+      <div class="sec"><h4>Evidence (first 5 lines)</h4>${win.ev.slice(0, 5).map((e) => `<div class="ev"><i>line ${e.n}</i>${esc(e.l)}</div>`).join("")}</div>
+      <div class="sec"><h4>${hits.length} rule${hits.length === 1 ? "" : "s"} matched, first wins</h4>${hits.map((h) => `<div class="m"><span class="t ${h === win ? "w" : ""}">${h === win ? "WINNER" : "also matched"}</span>#${h.i + 1} ${esc(h.r.kind)}</div>`).join("")}</div>`;
+  }
+  $("log").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => { run(); track("bw_edit"); }, 250); });
+  document.querySelectorAll("[data-s]").forEach((b) => b.addEventListener("click", () => { $("log").value = SAMPLES[b.dataset.s]; document.querySelectorAll("[data-s]").forEach((x) => x.setAttribute("aria-pressed", x === b)); run(); track("bw_sample"); }));
+  const F = { test: "xcodebuild-test-failure", compiler: "xcodebuild-compiler-error", linker: "make-linker-error", sim: "xcodebuild-simulator-timeout", timeout: "xcodebuild-build-timeout" };
+  Promise.all([fetch("rules.json").then((r) => { if (!r.ok) throw 0; return r.json(); }), ...Object.entries(F).map(([k, f]) => fetch("fixtures/" + f + ".log").then((r) => { if (!r.ok) throw 0; return r.text(); }).then((t) => (SAMPLES[k] = t)))]).then(([rs]) => {
+    rules = rs.map((r) => ({ ...r, re: mk(r.pattern) }));
+    $("rn").textContent = rules.length + " rules, read from LogClassifier.swift at deploy time, in the order the Swift tool checks them. Order matters: a code signing error is checked before a generic compiler error.";
+    $("rt").innerHTML = rules.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.kind)}</td><td>${Math.round(r.confidence * 100)}%</td><td class="p">${esc(r.pattern)}</td></tr>`).join("");
+    $("log").value = SAMPLES.test; window.__BW_READY__ = true; run();
+  }).catch(() => { $("boot").textContent = "The rule table did not load. The README lists the failure kinds."; });
+
+})();
+</script>
+</body>
+</html>
