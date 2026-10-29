@@ -11,7 +11,7 @@ Live demo of the rules in your browser: https://gerardrecinto.github.io/apple-bu
 
 ![demo](docs/assets/demo.gif)
 
-## Try it in 60 seconds
+## Try a sample
 
 You need macOS 14 or later and a Swift 6 toolchain (Xcode 16 or later). The first run compiles the project, which takes a little while.
 
@@ -90,7 +90,7 @@ It does not:
 
 ```bash
 buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
-buildwatch run: <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
+buildwatch run [--format terminal|json|markdown] [--owners auto|off] -- <command> [args...]
 buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
 buildwatch simulate [--workers N]
 buildwatch version
@@ -102,7 +102,7 @@ Examples:
 buildwatch analyze fixtures/xcodebuild-test-failure.log --format markdown
 buildwatch analyze fixtures/make-linker-error.log
 buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
-buildwatch run: make test
+buildwatch run -- make test
 buildwatch simulate
 buildwatch simulate --workers 1
 buildwatch version
@@ -280,6 +280,16 @@ That makes it useful during handoffs, release readiness checks, and build failur
 ```bash
 swift build
 swift test
+```
+
+The browser demo is built from the Swift rule table. To run its automated
+sample, failure-recovery, keyboard, and accessibility checks in Chromium,
+Firefox, and WebKit, install Node.js 22 or later and Python 3, then run:
+
+```bash
+npm ci
+npx playwright install --with-deps
+npm run test:site
 ```
 
 ## License
