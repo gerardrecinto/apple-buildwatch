@@ -40,6 +40,8 @@ public enum BuildWatchError: Error, LocalizedError, Sendable {
     case invalidCommand
     case missingArgument(String)
     case fileNotFound(String)
+    case usage(String)
+    case unknownCommand(String)
 
     public var errorDescription: String? {
         switch self {
@@ -49,6 +51,10 @@ public enum BuildWatchError: Error, LocalizedError, Sendable {
             return "Missing required argument: \(name)."
         case .fileNotFound(let path):
             return "File not found: \(path)."
+        case .usage(let message):
+            return message
+        case .unknownCommand(let name):
+            return "Unknown command: \(name). Run `buildwatch help` for usage."
         }
     }
 }

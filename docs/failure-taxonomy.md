@@ -8,7 +8,7 @@
 | linker_error | undefined symbols, duplicate symbols, linker command failed | Check target membership, linked frameworks, and search paths |
 | test_failure | XCTest failure lines, assertion output | Open the failing test and verify local reproduction |
 | flaky_test_candidate | async timeout, intermittent signal | Retry once and compare recurrence history |
-| simulator_failure | simctl, CoreSimulator, boot timeout | Reset simulator runtime or move to a clean worker |
+| simulator_failure | simctl failure, CoreSimulator failure or timeout, boot timeout | Reset simulator runtime or move to a clean worker |
 | code_signing_failure | provisioning profile, signing certificate | Check signing identity, profile, team, and configuration |
 | missing_dependency | no such module, package resolution failed | Check package resolution, Makefile target, and artifact availability |
 | timeout | build or command timed out, SIGKILL | Check the slowest stage, resource pressure, runaway tests, and worker capacity |

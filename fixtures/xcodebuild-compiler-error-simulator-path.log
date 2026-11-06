@@ -1,0 +1,3 @@
+CompileSwift normal arm64 /Users/ci/Library/Developer/CoreSimulator/Devices/ABC/data/Containers/Bundle/Application/App/Foo.swift
+/Users/ci/Library/Developer/CoreSimulator/Devices/ABC/data/Containers/Bundle/Application/App/Foo.swift:12:9: error: cannot find type Foo in scope
+** BUILD FAILED **

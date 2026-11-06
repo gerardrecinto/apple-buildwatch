@@ -3,7 +3,17 @@ import Foundation
 
 @main
 struct BuildWatchCLI {
-    static func main() throws {
+    static func main() {
+        do {
+            try dispatch()
+        } catch {
+            let message = (error as? LocalizedError)?.errorDescription ?? "\(error)"
+            FileHandle.standardError.write(Data("error: \(message)\n".utf8))
+            Foundation.exit(1)
+        }
+    }
+
+    private static func dispatch() throws {
         var args = Array(CommandLine.arguments.dropFirst())
         let command = args.first ?? "help"
         if !args.isEmpty { args.removeFirst() }
@@ -19,8 +29,10 @@ struct BuildWatchCLI {
             simulate(args)
         case "version":
             print("buildwatch \(Self.version) (\(Self.architecture); \(ProcessInfo.processInfo.operatingSystemVersionString))")
-        default:
+        case "help", "--help", "-h":
             print(help)
+        default:
+            throw BuildWatchError.unknownCommand(command)
         }
     }
 
@@ -49,10 +61,16 @@ struct BuildWatchCLI {
     }
 
     private static func run(_ args: [String]) throws {
-        guard !args.isEmpty else { throw BuildWatchError.missingArgument("command") }
-        let format = value(after: "--format", in: args) ?? "terminal"
-        let ownersMode = value(after: "--owners", in: args) ?? "auto"
-        let command = args.split(separator: "--").last.map(Array.init) ?? args.filter { $0 != "--format" && $0 != format && $0 != "--owners" && $0 != ownersMode }
+        guard let separator = args.firstIndex(of: "--") else {
+            throw BuildWatchError.usage("run needs `--` before the command, for example: buildwatch run -- make test")
+        }
+        let options = Array(args[..<separator])
+        let command = Array(args[(separator + 1)...])
+        guard !command.isEmpty else {
+            throw BuildWatchError.usage("run needs a command after `--`, for example: buildwatch run -- make test")
+        }
+        let format = value(after: "--format", in: options) ?? "terminal"
+        let ownersMode = value(after: "--owners", in: options) ?? "auto"
         let result = try BuildRunner().run(command: command)
         let gitProvider = GitContextProvider()
         let git = gitProvider.readGitContext()
@@ -163,10 +181,13 @@ struct BuildWatchCLI {
 
     Commands:
       buildwatch analyze <log-path> [--format terminal|json|markdown] [--owners auto|off]
-      buildwatch run -- <command> [args...] [--format terminal|json|markdown] [--owners auto|off]
+      buildwatch run [--format terminal|json|markdown] [--owners auto|off] -- <command> [args...]
       buildwatch compare <previous.json> <current.json> [--format terminal|json|markdown]
       buildwatch simulate [--workers N]
       buildwatch version
+
+    run takes its own options before `--`. Everything after `--` is the
+    command to run.
 
     compare diffs two `analyze --format json` snapshots into one
     build-over-build transition: regressed, resolved, persisting (same
