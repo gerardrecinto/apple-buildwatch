@@ -120,16 +120,21 @@ buildwatch compare yesterday.json today.json
 
 #### Download binary (macOS)
 
-The release binary is arm64 only (Apple silicon) and is not notarized. macOS may block it on first run. Build from source if you are on an Intel Mac or do not want to bypass that check.
+The release binary is arm64 only (Apple silicon) and is not notarized, so macOS may block it on first run. Build from source if you are on an Intel Mac or do not want to bypass that check.
 
-Download the latest release zip from [Releases](https://github.com/gerardrecinto/apple-buildwatch/releases):
+Releases through **v1.2.1** do not include checksums. Build from source below
+until a newer release lists both `buildwatch-macos.zip` and `SHA256SUMS`.
+Future releases made by this repository's release workflow publish both files.
+For such a release, run this from a checkout of the repository:
 
 ```bash
-curl -L https://github.com/gerardrecinto/apple-buildwatch/releases/latest/download/buildwatch-macos.zip -o buildwatch-macos.zip
-unzip buildwatch-macos.zip
-chmod +x buildwatch
-mv buildwatch /usr/local/bin/buildwatch
+printf 'Release tag with SHA256SUMS: '
+read -r buildwatch_tag
+scripts/install-release.sh "$buildwatch_tag"
 ```
+
+The [binary installation guide](docs/BINARY_INSTALL.md) explains the checks and
+what the checksum does and does not prove.
 
 #### Build from source
 
@@ -137,7 +142,9 @@ mv buildwatch /usr/local/bin/buildwatch
 git clone https://github.com/gerardrecinto/apple-buildwatch.git
 cd apple-buildwatch
 swift build -c release
-cp .build/release/buildwatch /usr/local/bin/buildwatch
+mkdir -p "$HOME/.local/bin"
+install -m 755 .build/release/buildwatch "$HOME/.local/bin/buildwatch"
+"$HOME/.local/bin/buildwatch" version
 ```
 
 Run from source:
@@ -281,6 +288,18 @@ swift build
 swift test
 ```
 
+The browser demo is built from the Swift rule table. To run its automated
+sample, failure-recovery, keyboard, and accessibility checks in Chromium,
+Firefox, and WebKit, install Node.js 22 or later and Python 3, then run:
+
+```bash
+npm ci
+npx playwright install --with-deps
+npm run test:site
+```
+
 ## License
 
 MIT
+
+Optional paid help: [scoped reviews and setup](SUPPORT.md).

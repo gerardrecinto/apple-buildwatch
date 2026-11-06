@@ -3,7 +3,7 @@ name: Pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", "Sources/BuildWatch/LogClassifier.swift", "fixtures/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "Sources/BuildWatch/LogClassifier.swift", "fixtures/**", "scripts/build-site.py", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,22 +24,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-      - name: Assemble site
-        run: |
-          mkdir -p _site/fixtures
-          cp site/index.html site/og.png site/robots.txt site/sitemap.xml _site/
-          cp fixtures/*.log _site/fixtures/
-          python3 - <<'PY'
-          import json, re
-          s = open("Sources/BuildWatch/LogClassifier.swift").read()
-          pat = re.compile(r'Rule\(\s*kind: \.(\w+),\s*pattern: #"(.*?)"#,\s*summary: "((?:[^"\\]|\\.)*)",\s*action: "((?:[^"\\]|\\.)*)",\s*confidence: ([0-9.]+)\s*\)', re.S)
-          snake = lambda k: re.sub(r"([A-Z])", lambda m: "_" + m.group(1).lower(), k)
-          rules = [{"kind": snake(m[0]), "pattern": m[1], "summary": m[2], "action": m[3], "confidence": float(m[4])} for m in pat.findall(s)]
-          assert len(rules) == s.count("Rule(\n            kind:"), "rule count mismatch"
-          json.dump(rules, open("_site/rules.json", "w"))
-          print(len(rules), "rules")
-          PY
-          touch _site/.nojekyll
+      - name: Assemble site from the Swift rule table
+        run: python3 scripts/build-site.py
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site

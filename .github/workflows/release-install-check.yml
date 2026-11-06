@@ -1,0 +1,36 @@
+name: Release installation checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-install:
+    name: Package and verified install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Check shell syntax
+        run: bash -n scripts/package-release.sh scripts/install-release.sh
+      - name: Verify packaged assets and execute the README installer in temporary directories
+        run: python3 -m unittest discover -s scripts -p 'test_release_install.py' -v
+      - name: Package and run the actual macOS release build
+        if: runner.os == 'macOS'
+        run: |
+          swift build -c release
+          release_dir="$(mktemp -d)"
+          trap 'rm -rf "$release_dir"' EXIT
+          scripts/package-release.sh .build/release/buildwatch "$release_dir"
+          cd "$release_dir"
+          shasum -a 256 -c SHA256SUMS
+          unzip -q buildwatch-macos.zip
+          ./buildwatch version

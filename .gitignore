@@ -6,3 +6,7 @@ DerivedData/
 !.gitkeep
 !fixtures/*.log
 .DS_Store
+node_modules/
+_site/
+playwright-report/
+test-results/
