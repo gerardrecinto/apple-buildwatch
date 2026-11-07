@@ -40,6 +40,7 @@ public enum BuildWatchError: Error, LocalizedError, Sendable {
     case invalidCommand
     case missingArgument(String)
     case fileNotFound(String)
+    case notAFile(String)
     case usage(String)
     case unknownCommand(String)
 
@@ -51,6 +52,8 @@ public enum BuildWatchError: Error, LocalizedError, Sendable {
             return "Missing required argument: \(name)."
         case .fileNotFound(let path):
             return "File not found: \(path)."
+        case .notAFile(let path):
+            return "\(path) is a directory. Pass the path of a build log file."
         case .usage(let message):
             return message
         case .unknownCommand(let name):

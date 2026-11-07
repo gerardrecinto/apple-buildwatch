@@ -41,7 +41,7 @@ struct BuildWatchCLI {
         let format = value(after: "--format", in: args) ?? "terminal"
         let ownersMode = value(after: "--owners", in: args) ?? "auto"
         let url = URL(fileURLWithPath: path)
-        guard FileManager.default.fileExists(atPath: url.path) else { throw BuildWatchError.fileNotFound(path) }
+        try requireFile(path)
 
         let log = String(decoding: try Data(contentsOf: url), as: UTF8.self)
         let gitProvider = GitContextProvider()
@@ -127,8 +127,16 @@ struct BuildWatchCLI {
         }
     }
 
+    private static func requireFile(_ path: String) throws {
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) else {
+            throw BuildWatchError.fileNotFound(path)
+        }
+        if isDirectory.boolValue { throw BuildWatchError.notAFile(path) }
+    }
+
     private static func loadAnalysis(path: String) throws -> BuildAnalysis {
-        guard FileManager.default.fileExists(atPath: path) else { throw BuildWatchError.fileNotFound(path) }
+        try requireFile(path)
         let data = try Data(contentsOf: URL(fileURLWithPath: path))
         return try JSONDecoder().decode(BuildAnalysis.self, from: data)
     }
