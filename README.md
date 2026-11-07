@@ -27,10 +27,10 @@ The `fixtures/` folder holds small sample logs, so you can try it without a fail
 
 ## Example output
 
-This is the output for the first fixture. Branch and SHA come from whatever git checkout you run it in.
+This is the output for the first fixture with owner lookup turned off. Branch and SHA come from whatever git checkout you run it in. Without `--owners off`, a fresh clone resolves the owner from this repository's own CODEOWNERS file, so `likely_owner` shows that owner instead of `Media`.
 
 ```text
-$ swift run buildwatch analyze fixtures/xcodebuild-test-failure.log
+$ swift run buildwatch analyze fixtures/xcodebuild-test-failure.log --owners off
 
 buildwatch
 status: failed
