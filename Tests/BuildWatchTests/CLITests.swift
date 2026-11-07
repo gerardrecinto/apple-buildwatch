@@ -91,4 +91,12 @@ final class CLITests: XCTestCase {
         XCTAssertEqual(result.stderr, "error: File not found: /nonexistent/build.log.\n")
         XCTAssertFalse(result.stderr.contains("Fatal error"))
     }
+
+    func testAnalyzeDirectoryExitsOneWithPlainError() throws {
+        let result = try buildwatch(["analyze", NSTemporaryDirectory()])
+
+        XCTAssertEqual(result.status, 1)
+        XCTAssertTrue(result.stderr.contains("is a directory. Pass the path of a build log file."), result.stderr)
+        XCTAssertFalse(result.stderr.contains("NSCocoaErrorDomain"))
+    }
 }
