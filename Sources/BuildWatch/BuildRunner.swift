@@ -31,7 +31,7 @@ public struct BuildRunner: Sendable {
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
 
-        let log = String(data: data, encoding: .utf8) ?? ""
+        let log = String(decoding: data, as: UTF8.self)
         return Result(log: log, exitCode: process.terminationStatus, duration: Date().timeIntervalSince(start))
     }
 }

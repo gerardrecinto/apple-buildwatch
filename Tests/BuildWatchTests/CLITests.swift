@@ -31,6 +31,31 @@ final class CLITests: XCTestCase {
         )
     }
 
+    func testRunOfSuccessfulCommandReportsPassed() throws {
+        let result = try buildwatch(["run", "--owners", "off", "--", "echo", "hello"])
+
+        XCTAssertEqual(result.status, 0)
+        XCTAssertTrue(result.stdout.contains("status: passed"), result.stdout)
+    }
+
+    func testRunKeepsLogWithInvalidUTF8() throws {
+        let result = try buildwatch(["run", "--owners", "off", "--", "sh", "-c", "printf 'caf\\351 error: boom\\n'; exit 2"])
+
+        XCTAssertEqual(result.status, 2)
+        XCTAssertTrue(result.stdout.contains("failure: compiler_error"), result.stdout)
+    }
+
+    func testAnalyzeAcceptsLogWithInvalidUTF8() throws {
+        let path = NSTemporaryDirectory() + "bw-invalid-utf8-\(UUID().uuidString).log"
+        try Data([0x63, 0x61, 0x66, 0xE9, 0x20, 0x65, 0x72, 0x72, 0x6F, 0x72, 0x3A, 0x20, 0x78, 0x0A]).write(to: URL(fileURLWithPath: path))
+        defer { try? FileManager.default.removeItem(atPath: path) }
+
+        let result = try buildwatch(["analyze", path, "--owners", "off"])
+
+        XCTAssertEqual(result.status, 0, result.stderr)
+        XCTAssertTrue(result.stdout.contains("failure: compiler_error"), result.stdout)
+    }
+
     func testRunWithColonSyntaxFailsWithMessage() throws {
         let result = try buildwatch(["run:", "echo", "hi"])
 

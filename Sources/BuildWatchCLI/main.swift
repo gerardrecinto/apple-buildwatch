@@ -43,7 +43,7 @@ struct BuildWatchCLI {
         let url = URL(fileURLWithPath: path)
         guard FileManager.default.fileExists(atPath: url.path) else { throw BuildWatchError.fileNotFound(path) }
 
-        let log = try String(contentsOf: url, encoding: .utf8)
+        let log = String(decoding: try Data(contentsOf: url), as: UTF8.self)
         let gitProvider = GitContextProvider()
         let git = gitProvider.readGitContext()
         let repoRoot = ownersMode == "off" ? nil : gitProvider.repositoryRoot()
@@ -75,7 +75,7 @@ struct BuildWatchCLI {
         let gitProvider = GitContextProvider()
         let git = gitProvider.readGitContext()
         let repoRoot = ownersMode == "off" ? nil : gitProvider.repositoryRoot()
-        let analysis = LogClassifier().analyze(log: result.log, git: git, repoRoot: repoRoot)
+        let analysis = LogClassifier().analyze(log: result.log, git: git, repoRoot: repoRoot, exitCode: result.exitCode)
         let writer = ReportWriter()
 
         switch format {

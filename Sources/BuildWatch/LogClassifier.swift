@@ -84,7 +84,7 @@ public struct LogClassifier: Sendable {
 
     public init() {}
 
-    public func analyze(log: String, git: GitContext = .unavailable, repoRoot: URL? = nil) -> BuildAnalysis {
+    public func analyze(log: String, git: GitContext = .unavailable, repoRoot: URL? = nil, exitCode: Int32? = nil) -> BuildAnalysis {
         let lines = log.components(separatedBy: .newlines)
         let stackFrames = StackTraceExtractor().extract(from: log)
 
@@ -107,7 +107,7 @@ public struct LogClassifier: Sendable {
         }
 
         return BuildAnalysis(
-            status: log.localizedCaseInsensitiveContains("BUILD SUCCEEDED") ? "passed" : "failed",
+            status: (exitCode == 0 || log.localizedCaseInsensitiveContains("BUILD SUCCEEDED")) ? "passed" : "failed",
             failureKind: .unknown,
             confidence: 0.30,
             summary: "No high-confidence failure rule matched this log.",
