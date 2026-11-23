@@ -136,6 +136,34 @@ final class LogClassifierTests: XCTestCase {
         XCTAssertNotEqual(LogClassifier().analyze(log: log).failureKind, .simulatorFailure)
     }
 
+    func testSuccessfulBuildMentioningDerivedDataIsPassed() {
+        let log = "CompileC /Users/x/Library/Developer/Xcode/DerivedData/App/Build/a.o\n** BUILD SUCCEEDED **\n"
+
+        let analysis = LogClassifier().analyze(log: log)
+
+        XCTAssertEqual(analysis.status, "passed")
+        XCTAssertEqual(analysis.failureKind, .unknown)
+    }
+
+    func testRunExitingZeroWithXcodeSelectPathIsPassed() {
+        let analysis = LogClassifier().analyze(log: "xcode-select -p: /Applications/Xcode.app\n", exitCode: 0)
+
+        XCTAssertEqual(analysis.status, "passed")
+        XCTAssertEqual(analysis.failureKind, .unknown)
+    }
+
+    func testDerivedDataFailureIsStillInfrastructure() {
+        let log = "fatal: unable to write to DerivedData: permission denied\n"
+
+        XCTAssertEqual(LogClassifier().analyze(log: log).failureKind, .infrastructureFailure)
+    }
+
+    func testXcodeSelectErrorIsStillInfrastructure() {
+        let log = "xcode-select: note: no developer tools were found, requesting install\n"
+
+        XCTAssertEqual(LogClassifier().analyze(log: log).failureKind, .infrastructureFailure)
+    }
+
     private func fixture(_ name: String) throws -> String {
         let url = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent("fixtures")

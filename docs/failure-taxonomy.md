@@ -13,7 +13,7 @@
 | missing_dependency | no such module, package resolution failed | Check package resolution, Makefile target, and artifact availability |
 | timeout | build or command timed out, SIGKILL | Check the slowest stage, resource pressure, runaway tests, and worker capacity |
 | network_failure | download timeout, TLS, connection reset, HTTP error | Check artifact host, credentials, and retry policy |
-| infrastructure_failure | disk full, xcode-select, DerivedData, resource pressure | Check worker health before assigning to product code |
+| infrastructure_failure | disk full, xcode-select errors, DerivedData errors, resource pressure | Check worker health before assigning to product code |
 
 ## Why rules first
 
