@@ -75,7 +75,7 @@ public struct LogClassifier: Sendable {
         ),
         Rule(
             kind: .infrastructureFailure,
-            pattern: #"(?i)(No space left on device|disk full|xcode-select|DerivedData|resource temporarily unavailable)"#,
+            pattern: #"(?i)(No space left on device|disk full|xcode-select: (error|note)|xcode-select.*(not set|invalid|requires)|DerivedData.*(corrupt|locked|unable|cannot|could not|permission denied|failed)|(unable|cannot|could not|failed).*DerivedData|resource temporarily unavailable)"#,
             summary: "The build worker or local toolchain environment failed.",
             action: "Check disk, selected Xcode, DerivedData state, worker health, and retry on a clean worker.",
             confidence: 0.86
